@@ -1,0 +1,42 @@
+{
+  "generatorVersion": "0.2.21",
+  "name": "akiro",
+  "version": "0.1.0",
+  "description": "Akiro is Conan&#39;s wizard. He will compile your dependent packages on lambda and send you back a zip of them!",
+  "main": "index.js",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FreeAllMedia/akiro.git"
+  },
+  "keywords": [
+    "akiro"
+  ],
+  "author": "Free All Media, LLC",
+  "contributors": [],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/FreeAllMedia/akiro/issues"
+  },
+  "homepage": "https://github.com/FreeAllMedia/akiro",
+  "dependencies": {
+    "incognito": "^0.1.4"
+  },
+  "devDependencies": {
+    "babel": "^5.5.6",
+    "babel-eslint": "^3.1.20",
+    "chai": "^3.0.0",
+    "coveralls": "^2.11.2",
+    "eslint": "^0.24.0",
+    "gulp": "^3.9.0",
+    "gulp-babel": "^5.1.0",
+    "gulp-babel-istanbul": "^0.11.0",
+    "gulp-mocha": "^2.1.3",
+    "gulp-util": "^3.0.6",
+    "mocha": "^2.2.5",
+    "sinon": "^1.17.2",
+    "superstack": "0.0.4"
+  }
+}
