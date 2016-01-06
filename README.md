@@ -28,15 +28,13 @@ To use Akiro programmatically, install locally via npm:
 npm install akiro --save-dev
 ```
 
-# Usage
-
-## Command Line Interface
+# Command Line Interface
 
 This section will go over using Akiro as a command line utility.
 
 **Note:** Akiro assumes that you have already setup your `~/.aws/credentials` file. If you have not, make sure that you do before you attempt to use Akiro.
 
-### 1. Deploy The Akiro Packager Lambda
+## 1. Deploy The Akiro Packager Lambda
 
 Before Akiro will work, you'll need to deploy the Akiro Packager Lambda by running the following command:
 
@@ -44,7 +42,7 @@ Before Akiro will work, you'll need to deploy the Akiro Packager Lambda by runni
 akiro deploy
 ```
 
-### 2. Specify an S3 branch
+## 2. Specify an S3 branch
 
 Akiro needs to know which branch you want to put the packages zip file when it is done building. You can do this in two ways:
 
@@ -60,11 +58,11 @@ Akiro needs to know which branch you want to put the packages zip file when it i
 	akiro package sqlite3 --branch=branchNameHere
 	```
 
-### 3. Compile Dependencies, Get Zip URL
+## 3. Compile Dependencies, Get Zip URL
 
 **The Akiro CLI takes a bucket name as the first argument**, then one or more package names. It can also accept one or more options such as `--name` to specify the package file's eventual name on s3.
 
-#### 3.1 Zip the latest version of a package
+### 3.1 Zip the latest version of a package
 
 If no version is supplied, the latest version of a package will be used.
 
@@ -74,7 +72,7 @@ building package, please wait ...........
 Package available at: http://myS3Bucket.s3-us-east-1.amazonaws.com/packages.zip
 ```
 
-#### 3.2 Zip a specific version of a package
+### 3.2 Zip a specific version of a package
 
 To use a specific version of a package, use the following syntax:
 
@@ -84,7 +82,7 @@ building package, please wait ...........
 Package available at: http://myS3Bucket.s3-us-east-1.amazonaws.com/packages.zip
 ```
 
-#### 3.3 Zip multiple packages into a single file
+### 3.3 Zip multiple packages into a single file
 
 
 
@@ -94,7 +92,7 @@ building package, please wait ...........
 Package available at: http://myS3Bucket.s3-us-east-1.amazonaws.com/packages.zip
 ```
 
-#### 3.4 Specify the zip file name
+### 3.4 Specify the zip file name
 
 By default Akiro will create a "packages.zip" file in the bucket you specify. If you want to change this name to something else, simply supply the `--name` flag at the end of your command.
 
@@ -110,7 +108,7 @@ This section will go over using Akiro as a node.js package.
 
 **Note:** Akiro assumes that you have already setup your `~/.aws/credentials` file. If you have not, make sure that you do before you attempt to use Akiro.
 
-### 1. Deploy The Akiro Packager Lambda
+## 1. Deploy The Akiro Packager Lambda
 
 ``` javascript
 import Akiro from "akiro";
@@ -122,7 +120,7 @@ akiro.deploy("bucketNameHere", (error) => {
 });
 ```
 
-### 2. Specify an S3 branch
+## 2. Specify an S3 branch
 
 ``` javascript
 import Akiro from "akiro";
@@ -132,9 +130,9 @@ const akiro = new Akiro({
 });
 ```
 
-### 3. Compile Dependencies, Get Zip URL
+## 3. Compile Dependencies, Get Zip URL
 
-#### 3.1 Zip the latest version of a package
+### 3.1 Zip the latest version of a package
 
 ``` javascript
 import Akiro from "akiro";
@@ -149,7 +147,7 @@ akiro.package("sqlite3", (error, packageUrl) => {
 });
 ```
 
-#### 3.2 Zip a specific version of a package
+### 3.2 Zip a specific version of a package
 
 ``` javascript
 import Akiro from "akiro";
@@ -164,7 +162,7 @@ akiro.package("sqlite3@1.1.3", (error, packageUrl) => {
 });
 ```
 
-#### 3.3 Zip multiple packages into a single file
+### 3.3 Zip multiple packages into a single file
 
 ``` javascript
 import Akiro from "akiro";
@@ -184,7 +182,7 @@ akiro.package(packages, (error, packageUrl) => {
 });
 ```
 
-#### 3.4 Specify the zip file name
+### 3.4 Specify the zip file name
 
 ``` javascript
 import Akiro from "akiro";
