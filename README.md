@@ -2,20 +2,6 @@
 
 Akiro is a stand-alone library with a command line interface that takes a list of packages, then invokes a magic Lambda function that builds all of those packages within the AWS Lambda environment itself. This makes compilation of native libraries for lambda effortless and seamless.
 
-## How it Works
-
-### `akiro.initialize(iamRoleName, [callback])`:
-
-* Creates an AWS Lambda called the `Akiro Packager` on your account using the designated IAM Role.
-* This step only needs to be completed once when Akiro is first used and after upgrading Akiro to a new version.
-
-### `akiro.package(bucketName, packageList, [localZipFilePath,] [callback])`:
-
-* Sends a list of package names and their respective version numbers to the `Akiro Packager`.
-* `Akiro Packager` builds all of the designated packages on the AWS Lambda architecture, ensuring full compatibility for packages containing native code such as C, C++, etc.
-* `Akiro Packager` puts all of the built packages into a .zip file, saves it to an S3 bucket.
-* Optionally, you can provide a `localZipFilePath` to automatically download the package zip to the designated path.
-
 ## Compatibility & Quality
 
 ![ECMAScript 6 & 5](https://img.shields.io/badge/ECMAScript-6%20/%205-red.svg) ![node 0.12.x](https://img.shields.io/badge/node-0.12.x-brightgreen.svg) ![node 0.11.x](https://img.shields.io/badge/node-0.11.x-brightgreen.svg) ![node 0.10.x](https://img.shields.io/badge/node-0.10.x-brightgreen.svg) ![iojs 2.x.x](https://img.shields.io/badge/iojs-2.x.x-brightgreen.svg) ![iojs 1.x.x](https://img.shields.io/badge/iojs-1.x.x-brightgreen.svg)
@@ -23,6 +9,31 @@ Akiro is a stand-alone library with a command line interface that takes a list o
 [![Build Status](https://travis-ci.org/FreeAllMedia/akiro.png?branch=master)](https://travis-ci.org/FreeAllMedia/akiro) [![Dependency Status](https://david-dm.org/FreeAllMedia/akiro.png?theme=shields.io)](https://david-dm.org/FreeAllMedia/akiro?theme=shields.io) [![Dev Dependency Status](https://david-dm.org/FreeAllMedia/akiro/dev-status.svg)](https://david-dm.org/FreeAllMedia/akiro?theme=shields.io#info=devDependencies)
 
 [![Coverage Status](https://coveralls.io/repos/FreeAllMedia/akiro/badge.svg)](https://coveralls.io/r/FreeAllMedia/akiro) [![Code Climate](https://codeclimate.com/github/FreeAllMedia/akiro/badges/gpa.svg)](https://codeclimate.com/github/FreeAllMedia/akiro) [![bitHound Score](https://www.bithound.io/github/FreeAllMedia/akiro/badges/score.svg)](https://www.bithound.io/github/FreeAllMedia/akiro)
+
+# Table of Contents
+
+* [How it Works](#how-it-works)
+* [Installation](#installation)
+	* [Configuration](#configuration)
+* [Usage](#usage)
+	* [akiro.initialize([callback])](#akiroinitialize--callback--)
+	* [akiro.package(packageList, s3BucketName, [options,] [callback])](#akiropackage-packagelist--s3bucketname---options----callback--)
+* [Contributing](#we-love-contributors-)
+
+# How it Works
+
+## 1. akiro.initialize(iamRoleName, [callback]):
+
+* Creates an AWS Lambda called the `Akiro Packager` on your account using the designated IAM Role.
+* This step only needs to be completed once when Akiro is first used and after upgrading Akiro to a new version.
+
+## 2. akiro.package(bucketName, packageList, [localZipFilePath,] [callback]):
+
+* Sends a list of package names and their respective version numbers to the `Akiro Packager`.
+* `Akiro Packager` builds all of the designated packages on the AWS Lambda architecture, ensuring full compatibility for packages containing native code such as C, C++, etc.
+* `Akiro Packager` puts all of the built packages into a .zip file, saves it to an S3 bucket.
+* Optionally, you can provide a `localZipFilePath` to automatically download the package zip to the designated path.
+
 
 # Installation
 
@@ -142,21 +153,46 @@ akiro.package(packageList, bucketName, (error, data) => {
 });
 ```
 
+**Example 3. Change the file name of the Package Zip on S3:**
+
+* By default Akiro uses the file name, "packages.zip" on S3.
+* You can specify a different file name with the `s3FileName` option.
+
+``` javascript
+import Akiro from "akiro";
+
+const akiro = new Akiro();
+
+const packageList = {
+	"async": "1.0.0",
+	"incognito": "^0.1.0"
+};
+
+const bucketName = "bucketNameHere";
+
+const options = {
+	s3FileName: "differentName.zip"
+};
+
+akiro.package(packageList, bucketName, options, (error, data) => {
+	if (error) { throw error; }
+	console.log(data.url); // http://branchNameHere.s3-us-east-1.amazonaws.com/differentName.zip
+});
+```
+
 # We Love Contributors!
 
 Want to contribute to this repo? Our teams welcome all quality contributions!
 
-**"What is a quality contribution?"**
-
-A fair question! Here are some things to keep in mind before submitting a pull request:
-
-* **All submitted code must have zero issues when linted against the supplied `.eslintrc` guidelines.**
- 	* All `.eslintrc` guidelines should be followed *as-is*, with exceptions for impossible/impractical situations (such as when violating the `new-cap` rule by utilizing 3rd-party libraries that has Uppercase function names).
-* **Test coverage must remain at 100%.**
-	* Please don't rely upon the core devs to write post-hoc tests. This software should remain test-*driven*.
-	* If there are serious considerations as to why the 100% limit should be broken, please submit a new issue discussing it.
-* **Tests must be well-designed.**
-	* Each test should be carefully designed so that it is covering off on new scenarios, while avoiding overlap with others.
-	* One assertion per test. (We don't want to comment out a bunch of assertions to find out which one failed.)
-* **When in doubt; ask!**
-	* We watch our issues very carefully. Please utilize it for all questions, comments, and requests.
+* **"What is a quality contribution?"**
+	* **All submitted code must have zero issues when linted against the supplied `.eslintrc` guidelines.**
+	 	* All `.eslintrc` guidelines should be followed *as-is*, with exceptions for impossible/impractical situations (such as when violating the `new-cap` rule by utilizing 3rd-party libraries that has Uppercase function names).
+	* **Test coverage must remain at 100%.**
+		* Please don't rely upon the core devs to write post-hoc tests. This software should remain test-*driven*.
+		* If there are serious considerations as to why the 100% limit should be broken, please submit a new issue discussing it.
+	* **Tests must be well-designed.**
+		* Each test should be carefully designed so that it is covering off on new scenarios, while avoiding overlap with others.
+		* One assertion per test (*it* block). Please don't make us comment out a bunch of assertions to find out which one failed.
+* **"What if I'm unsure about something?"**
+	* **Create an issue**
+		* We watch our issues very carefully. Please utilize it for all questions, comments, and requests.
