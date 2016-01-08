@@ -45,9 +45,9 @@ akiro.deploy((error) => {
 });
 ```
 
-|name|type|description|
-|-|-|-|
-|callback|function(error)|Called after deployment has completed, or an error has returned.|
+name		|type						|description
+--------|---------------|-----------
+callback|function(error)|Called after deployment has completed, or an error has returned.
 
 ## .package(packageList, [localZipFilePath,] callback);
 
