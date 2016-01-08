@@ -4,14 +4,14 @@ Certain packages you may want to use in AWS Lambda rely upon compiling native co
 
 Akiro.js takes a list of packages and version numbers, invokes a special Lambda function with them that builds each package within the AWS Lambda environment, then zips and delivers them to you or an S3 bucket.
 
-* [Compatibility & Quality](#compatibility--amp--quality)
+* [Compatibility & Quality](#compatibility--quality)
 * [How it Works](#how-it-works)
 * [Installation](#installation)
 	* [Configuration](#configuration)
 * [Usage](#usage)
-	* [akiro.initialize([callback])](#akiroinitialize--callback--)
-	* [akiro.package(packageList, s3BucketName, [options,] [callback])](#akiropackage-packagelist--s3bucketname---options----callback--)
-* [Contributing](#we-love-contributors-)
+	* [akiro.initialize([callback])](#akiroinitializecallback)
+	* [akiro.package(packageList, s3BucketName, [options,] [callback])](#akiropackagepackagelist-s3bucketname-options-callback)
+* [Contributing](#we-love-contributors)
 
 ## Compatibility & Quality
 
