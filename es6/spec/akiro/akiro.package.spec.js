@@ -15,8 +15,7 @@ describe("akiro.package(packageList, [localZipFilePath,] callback)", () => {
 		MockAWS.reset();
 
 		config = {
-			AWS: MockAWS,
-			bucket: bucketName
+			AWS: MockAWS
 		};
 
 		akiro = new Akiro(config);
@@ -25,7 +24,7 @@ describe("akiro.package(packageList, [localZipFilePath,] callback)", () => {
 	});
 
 	it("should invoke the Akiro lambda function on AWS", () => {
-		
+
 	});
 
 	describe("(When localZipFilePath is provided)", () => {

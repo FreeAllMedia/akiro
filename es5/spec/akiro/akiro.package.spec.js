@@ -26,8 +26,7 @@ describe("akiro.package(packageList, [localZipFilePath,] callback)", function ()
 		_helpersMockAwsJs2["default"].reset();
 
 		config = {
-			AWS: _helpersMockAwsJs2["default"],
-			bucket: bucketName
+			AWS: _helpersMockAwsJs2["default"]
 		};
 
 		akiro = new _libAkiroJs2["default"](config);

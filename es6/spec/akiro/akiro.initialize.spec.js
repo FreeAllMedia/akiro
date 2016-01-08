@@ -1,5 +1,4 @@
 import Akiro from "../../lib/akiro.js";
-import sinon from "sinon";
 import MockAWS from "../helpers/mockAws.js";
 
 describe("akiro.initialize(callback)", () => {
@@ -12,11 +11,8 @@ describe("akiro.initialize(callback)", () => {
 	beforeEach(done => {
 		MockAWS.reset();
 
-		roleName = "SomeRole";
-
 		config = {
-			AWS: MockAWS,
-			role: roleName
+			AWS: MockAWS
 		};
 
 		akiro = new Akiro(config);

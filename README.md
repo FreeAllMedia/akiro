@@ -1,8 +1,8 @@
 # Akiro.js [![npm version](https://img.shields.io/npm/v/akiro.svg)](https://www.npmjs.com/package/akiro) [![license type](https://img.shields.io/npm/l/akiro.svg)](https://github.com/FreeAllMedia/akiro.git/blob/master/LICENSE) [![npm downloads](https://img.shields.io/npm/dm/akiro.svg)](https://www.npmjs.com/package/akiro)
 
-Akiro is a stand-alone library with a command line interface that takes a list of packages, then invokes a magic Lambda function that builds all of those packages within the AWS Lambda environment itself. This makes compilation of native libraries for lambda effortless and seamless.
+Certain packages you may want to use in AWS Lambda rely upon compiling native code for the architecture it will be running on. This poses a problem when dependencies are compiled on our local development machines then expected to run on the AWS Lambda architecture.
 
-# Table of Contents
+Akiro.js takes a list of packages and version numbers, invokes a special Lambda function with them that builds each package within the AWS Lambda environment, then zips and delivers them to you or an S3 bucket.
 
 * [Compatibility & Quality](#compatibility--amp--quality)
 * [How it Works](#how-it-works)

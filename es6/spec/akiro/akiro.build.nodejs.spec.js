@@ -3,15 +3,20 @@ import temp from "temp";
 import fileSystem from "fs";
 import unzip from "unzip2";
 import stream from "stream";
+import glob from "glob";
+import path from "path";
 
-describe("akiro.build(filePath, callback)", () => {
-	let akiro,
+import {dependencies} from "../../../package.json";
+
+xdescribe("akiro.build(filePath, callback)", () => {
+	let config,
+			akiro,
 			filePath;
 
 	beforeEach(done => {
 		temp.track();
 
-		const config = {};
+		config = {};
 
 		akiro = new Akiro(config);
 
@@ -73,10 +78,37 @@ describe("akiro.build(filePath, callback)", () => {
 			lambdaFile.pipe(writableStream);
 		});
 
-		xit("should contain all Akiro Packager dependencies", () => {
-			filePaths.should.eql([
-				"lambda.js"
-			]);
+		it("should contain all Akiro Packager dependencies", done => {
+			let expectedFilePaths = [	"lambda.js" ];
+
+			const rootDirectoryPath = `${__dirname}/../../../`;
+			const nodeModulesDirectoryPath = `${rootDirectoryPath}node_modules/`;
+
+			for(let dependencyName in dependencies) {
+				const moduleFilesGlob = `${nodeModulesDirectoryPath}${dependencyName}/**/*`;
+				glob(moduleFilesGlob, addToExpectedFilePaths);
+			}
+
+			function addToExpectedFilePaths(error, moduleFilePaths) {
+				if (error) { throw error; }
+				moduleFilePaths.forEach((moduleFilePath) => {
+					const relativeModuleFilePath = path.relative(rootDirectoryPath, moduleFilePath);
+					expectedFilePaths.push(relativeModuleFilePath);
+				});
+			}
+
+			let actualFilePaths = [];
+
+			fileSystem.createReadStream(filePath)
+				.pipe(unzip.Parse())
+				.on("entry", (entry) => {
+					actualFilePaths.push(entry.path);
+					files.push(entry);
+				})
+				.on("close", () => {
+					actualFilePaths.should.eql(expectedFilePaths);
+					done();
+				});
 		});
 	});
 });

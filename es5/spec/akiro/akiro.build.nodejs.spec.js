@@ -22,14 +22,25 @@ var _stream = require("stream");
 
 var _stream2 = _interopRequireDefault(_stream);
 
-describe("akiro.build(filePath, callback)", function () {
-	var akiro = undefined,
+var _glob = require("glob");
+
+var _glob2 = _interopRequireDefault(_glob);
+
+var _path = require("path");
+
+var _path2 = _interopRequireDefault(_path);
+
+var _packageJson = require("../../../package.json");
+
+xdescribe("akiro.build(filePath, callback)", function () {
+	var config = undefined,
+	    akiro = undefined,
 	    filePath = undefined;
 
 	beforeEach(function (done) {
 		_temp2["default"].track();
 
-		var config = {};
+		config = {};
 
 		akiro = new _libAkiroJs2["default"](config);
 
@@ -89,8 +100,36 @@ describe("akiro.build(filePath, callback)", function () {
 			lambdaFile.pipe(writableStream);
 		});
 
-		xit("should contain all Akiro Packager dependencies", function () {
-			filePaths.should.eql(["lambda.js"]);
+		it("should contain all Akiro Packager dependencies", function (done) {
+			var expectedFilePaths = ["lambda.js"];
+
+			var rootDirectoryPath = __dirname + "/../../../";
+			var nodeModulesDirectoryPath = rootDirectoryPath + "node_modules/";
+
+			for (var dependencyName in _packageJson.dependencies) {
+				var moduleFilesGlob = "" + nodeModulesDirectoryPath + dependencyName + "/**/*";
+				(0, _glob2["default"])(moduleFilesGlob, addToExpectedFilePaths);
+			}
+
+			function addToExpectedFilePaths(error, moduleFilePaths) {
+				if (error) {
+					throw error;
+				}
+				moduleFilePaths.forEach(function (moduleFilePath) {
+					var relativeModuleFilePath = _path2["default"].relative(rootDirectoryPath, moduleFilePath);
+					expectedFilePaths.push(relativeModuleFilePath);
+				});
+			}
+
+			var actualFilePaths = [];
+
+			_fs2["default"].createReadStream(filePath).pipe(_unzip22["default"].Parse()).on("entry", function (entry) {
+				actualFilePaths.push(entry.path);
+				files.push(entry);
+			}).on("close", function () {
+				actualFilePaths.should.eql(expectedFilePaths);
+				done();
+			});
 		});
 	});
 });
