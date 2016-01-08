@@ -20,9 +20,9 @@ npm install akiro --save-dev
 
 # Configuration
 
-## 1. Setup your ~/.aws/credentials
+## Setup your `~/.aws/credentials`
 
-## 2. Setup .akiro.json
+Akiro expects there to be an ~/.aws/credentials file. For more information on how to set up this file, [read this guide](http://docs.aws.amazon.com/AWSJavaScriptSDK/guide/node-configuring.html#Credentials_from_the_Shared_Credentials_File_____aws_credentials_).
 
 # Usage
 
