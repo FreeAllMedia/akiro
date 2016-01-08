@@ -2,16 +2,9 @@
 
 Akiro is a stand-alone library with a command line interface that takes a list of packages, then invokes a magic Lambda function that builds all of those packages within the AWS Lambda environment itself. This makes compilation of native libraries for lambda effortless and seamless.
 
-## Compatibility & Quality
-
-![ECMAScript 6 & 5](https://img.shields.io/badge/ECMAScript-6%20/%205-red.svg) ![node 0.12.x](https://img.shields.io/badge/node-0.12.x-brightgreen.svg) ![node 0.11.x](https://img.shields.io/badge/node-0.11.x-brightgreen.svg) ![node 0.10.x](https://img.shields.io/badge/node-0.10.x-brightgreen.svg) ![iojs 2.x.x](https://img.shields.io/badge/iojs-2.x.x-brightgreen.svg) ![iojs 1.x.x](https://img.shields.io/badge/iojs-1.x.x-brightgreen.svg)
-
-[![Build Status](https://travis-ci.org/FreeAllMedia/akiro.png?branch=master)](https://travis-ci.org/FreeAllMedia/akiro) [![Dependency Status](https://david-dm.org/FreeAllMedia/akiro.png?theme=shields.io)](https://david-dm.org/FreeAllMedia/akiro?theme=shields.io) [![Dev Dependency Status](https://david-dm.org/FreeAllMedia/akiro/dev-status.svg)](https://david-dm.org/FreeAllMedia/akiro?theme=shields.io#info=devDependencies)
-
-[![Coverage Status](https://coveralls.io/repos/FreeAllMedia/akiro/badge.svg)](https://coveralls.io/r/FreeAllMedia/akiro) [![Code Climate](https://codeclimate.com/github/FreeAllMedia/akiro/badges/gpa.svg)](https://codeclimate.com/github/FreeAllMedia/akiro) [![bitHound Score](https://www.bithound.io/github/FreeAllMedia/akiro/badges/score.svg)](https://www.bithound.io/github/FreeAllMedia/akiro)
-
 # Table of Contents
 
+* [Compatibility & Quality](#compatibility--amp--quality)
 * [How it Works](#how-it-works)
 * [Installation](#installation)
 	* [Configuration](#configuration)
@@ -19,6 +12,14 @@ Akiro is a stand-alone library with a command line interface that takes a list o
 	* [akiro.initialize([callback])](#akiroinitialize--callback--)
 	* [akiro.package(packageList, s3BucketName, [options,] [callback])](#akiropackage-packagelist--s3bucketname---options----callback--)
 * [Contributing](#we-love-contributors-)
+
+## Compatibility & Quality
+
+![ECMAScript 6 & 5](https://img.shields.io/badge/ECMAScript-6%20/%205-red.svg) ![node 0.12.x](https://img.shields.io/badge/node-0.12.x-brightgreen.svg) ![node 0.11.x](https://img.shields.io/badge/node-0.11.x-brightgreen.svg) ![node 0.10.x](https://img.shields.io/badge/node-0.10.x-brightgreen.svg) ![iojs 2.x.x](https://img.shields.io/badge/iojs-2.x.x-brightgreen.svg) ![iojs 1.x.x](https://img.shields.io/badge/iojs-1.x.x-brightgreen.svg)
+
+[![Build Status](https://travis-ci.org/FreeAllMedia/akiro.png?branch=master)](https://travis-ci.org/FreeAllMedia/akiro) [![Dependency Status](https://david-dm.org/FreeAllMedia/akiro.png?theme=shields.io)](https://david-dm.org/FreeAllMedia/akiro?theme=shields.io) [![Dev Dependency Status](https://david-dm.org/FreeAllMedia/akiro/dev-status.svg)](https://david-dm.org/FreeAllMedia/akiro?theme=shields.io#info=devDependencies)
+
+[![Coverage Status](https://coveralls.io/repos/FreeAllMedia/akiro/badge.svg)](https://coveralls.io/r/FreeAllMedia/akiro) [![Code Climate](https://codeclimate.com/github/FreeAllMedia/akiro/badges/gpa.svg)](https://codeclimate.com/github/FreeAllMedia/akiro) [![bitHound Score](https://www.bithound.io/github/FreeAllMedia/akiro/badges/score.svg)](https://www.bithound.io/github/FreeAllMedia/akiro)
 
 # How it Works
 
