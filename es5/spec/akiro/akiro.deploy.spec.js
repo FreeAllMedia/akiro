@@ -10,28 +10,30 @@ var _sinon = require("sinon");
 
 var _sinon2 = _interopRequireDefault(_sinon);
 
-describe("akiro.deploy(callback)", function () {
-	var akiro = undefined,
-	    callback = undefined,
-	    awsLambda = undefined;
+var _helpersMockAwsJs = require("../helpers/mockAws.js");
 
-	beforeEach(function () {
-		awsLambda = {
-			createFunction: _sinon2["default"].spy(function (parameters, callback) {
-				callback();
-			})
+var _helpersMockAwsJs2 = _interopRequireDefault(_helpersMockAwsJs);
+
+describe("akiro.deploy(callback)", function () {
+	var config = undefined,
+	    akiro = undefined,
+	    callback = undefined,
+	    roleName = undefined;
+
+	beforeEach(function (done) {
+		_helpersMockAwsJs2["default"].reset();
+
+		roleName = "SomeRole";
+
+		config = {
+			AWS: _helpersMockAwsJs2["default"],
+			role: roleName
 		};
 
-		akiro = new _libAkiroJs2["default"]({
-			branch: "someBranch",
-			awsLambda: awsLambda
-		});
+		akiro = new _libAkiroJs2["default"](config);
+
+		akiro.deploy(done);
 	});
 
-	describe("(Akiro Lambda Zip File)", function () {
-		it("should contain the Akiro packager lambda");
-		it("should contain all Akiro packager dependencies");
-	});
-
-	it("should create an Akiro lambda function on AWS");
+	it("should create an Akiro Builder lambda function on AWS");
 });

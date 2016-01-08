@@ -22,6 +22,11 @@ var Akiro = (function () {
 	}
 
 	_createClass(Akiro, [{
+		key: "build",
+		value: function build(filePath, callback) {
+			return require("./akiro/akiro.build.js").call(this, filePath, callback);
+		}
+	}, {
 		key: "config",
 		get: function get() {
 			return (0, _incognito2["default"])(this).config;

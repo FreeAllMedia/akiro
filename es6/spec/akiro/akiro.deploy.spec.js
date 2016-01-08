@@ -1,28 +1,28 @@
 import Akiro from "../../lib/akiro.js";
 import sinon from "sinon";
+import MockAWS from "../helpers/mockAws.js";
 
 describe("akiro.deploy(callback)", () => {
-	let akiro,
+	let config,
+			akiro,
 			callback,
-			awsLambda;
 
-	beforeEach(() => {
-		awsLambda = {
-			createFunction: sinon.spy((parameters, callback) => {
-				callback();
-			})
+			roleName;
+
+	beforeEach(done => {
+		MockAWS.reset();
+
+		roleName = "SomeRole";
+
+		config = {
+			AWS: MockAWS,
+			role: roleName
 		};
 
-		akiro = new Akiro({
-			branch: "someBranch",
-			awsLambda: awsLambda
-		});
+		akiro = new Akiro(config);
+
+		akiro.deploy(done);
 	});
 
-	describe("(Akiro Lambda Zip File)", () => {
-		it("should contain the Akiro packager lambda");
-		it("should contain all Akiro packager dependencies");
-	});
-
-	it("should create an Akiro lambda function on AWS");
+	it("should create an Akiro Builder lambda function on AWS");
 });

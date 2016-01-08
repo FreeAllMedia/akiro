@@ -8,4 +8,8 @@ export default class Akiro {
 	get config() {
 		return privateData(this).config;
 	}
+
+	build(filePath, callback) {
+		return require("./akiro/akiro.build.js").call(this, filePath, callback);
+	}
 }
