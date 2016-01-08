@@ -23,12 +23,12 @@ Akiro is a stand-alone library with a command line interface that takes a list o
 
 # How it Works
 
-## 1. akiro.initialize(iamRoleName, [callback]):
+**1. `akiro.initialize(iamRoleName, [callback])`**
 
 * Creates an AWS Lambda called the `Akiro Packager` on your account using the designated IAM Role.
 * This step only needs to be completed once when Akiro is first used and after upgrading Akiro to a new version.
 
-## 2. akiro.package(bucketName, packageList, [localZipFilePath,] [callback]):
+**2. `akiro.package(bucketName, packageList, [localZipFilePath,] [callback])`**
 
 * Sends a list of package names and their respective version numbers to the `Akiro Packager`.
 * `Akiro Packager` builds all of the designated packages on the AWS Lambda architecture, ensuring full compatibility for packages containing native code such as C, C++, etc.
@@ -46,7 +46,7 @@ Akiro is a stand-alone library with a command line interface that takes a list o
 
 ## Configuration
 
-### Setup `~/.aws/credentials`
+**Setup `~/.aws/credentials`**
 
 * For now, Akiro expects there to be an ~/.aws/credentials file.
 * For more information on how to set up this file, [read this guide](http://docs.aws.amazon.com/AWSJavaScriptSDK/guide/node-configuring.html#Credentials_from_the_Shared_Credentials_File_____aws_credentials_).
@@ -54,9 +54,11 @@ Akiro is a stand-alone library with a command line interface that takes a list o
 
 # Usage
 
+Akiro has two primary functions: `.initialize()` and `.package()`.
+
 ## akiro.initialize([callback])
 
-Build and uploads the `Akiro Packager` to S3, with an optional callback.
+Build and upload the `Akiro Packager` to S3, with an optional callback.
 
 **Note:** This method will replace the prior initialized version of `Akiro Packager` on AWS Lambda with the current version.
 

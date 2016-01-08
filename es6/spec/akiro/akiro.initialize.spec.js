@@ -2,7 +2,7 @@ import Akiro from "../../lib/akiro.js";
 import sinon from "sinon";
 import MockAWS from "../helpers/mockAws.js";
 
-describe("akiro.deploy(callback)", () => {
+describe("akiro.initialize(callback)", () => {
 	let config,
 			akiro,
 			callback,
@@ -21,7 +21,7 @@ describe("akiro.deploy(callback)", () => {
 
 		akiro = new Akiro(config);
 
-		akiro.deploy(done);
+		akiro.initialize(done);
 	});
 
 	it("should create an Akiro Builder lambda function on AWS");
