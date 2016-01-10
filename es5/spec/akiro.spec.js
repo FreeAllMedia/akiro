@@ -16,4 +16,16 @@ describe("Akiro(config)", function () {
 		};
 		akiro = new _libAkiroJs2["default"](config);
 	});
+
+	describe("akiro.config", function () {
+		it("should return the supplied config object", function () {
+			akiro.config.should.eql(config);
+		});
+
+		it("should be read-only", function () {
+			(function () {
+				akiro.config = { "new": "config" };
+			}).should["throw"]();
+		});
+	});
 });

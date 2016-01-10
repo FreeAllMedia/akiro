@@ -24,6 +24,7 @@
   "dependencies": {
     "archiver": "^0.21.0",
     "aws-sdk": "^2.2.28",
+    "conan": "0.0.2",
     "incognito": "^0.1.4"
   },
   "devDependencies": {

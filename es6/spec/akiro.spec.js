@@ -10,4 +10,16 @@ describe("Akiro(config)", () => {
 		};
 		akiro = new Akiro(config);
 	});
+
+	describe("akiro.config", () => {
+		it("should return the supplied config object", () => {
+			akiro.config.should.eql(config);
+		});
+
+		it("should be read-only", () => {
+			() => {
+				akiro.config = { new: "config" };
+			}.should.throw();
+		});
+	});
 });
