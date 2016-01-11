@@ -1,12 +1,10 @@
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
 exports["default"] = handler;
 
-function handler(event, context) {
-	context.succeed(null);
-}
+function handler(event, context) {}
 
 module.exports = exports["default"];

@@ -6,6 +6,8 @@ var _libAkiroJs = require("../../lib/akiro.js");
 
 var _libAkiroJs2 = _interopRequireDefault(_libAkiroJs);
 
+var _conan = require("conan");
+
 var _helpersMockConanJs = require("../helpers/mockConan.js");
 
 var _helpersMockConanJs2 = _interopRequireDefault(_helpersMockConanJs);
@@ -16,7 +18,7 @@ var _path2 = _interopRequireDefault(_path);
 
 var _packageJson = require("../../../package.json");
 
-describe("akiro.initialize(callback)", function () {
+describe("akiro.initialize(iamRoleName, callback)", function () {
 	var config = undefined,
 	    akiro = undefined,
 	    callback = undefined,
@@ -32,14 +34,17 @@ describe("akiro.initialize(callback)", function () {
 		lambdaFilePath = _path2["default"].normalize(__dirname + "../../../lib/akiro/packagers/akiro.packager.nodejs.js");
 
 		config = {
-			conan: mockConan = new _helpersMockConanJs2["default"](),
-			role: lambdaRole
+			conan: mockConan = new _helpersMockConanJs2["default"]()
 		};
 
 		akiro = new _libAkiroJs2["default"](config);
 
 		callback = done;
-		akiro.initialize(callback);
+		akiro.initialize(lambdaRole, callback);
+	});
+
+	it("should use the ConanAwsLambdaPlugin", function () {
+		mockConan.use.calledWith(_conan.ConanAwsLambdaPlugin).should.be["true"];
 	});
 
 	describe("Akiro Lambda", function () {
@@ -67,8 +72,8 @@ describe("akiro.initialize(callback)", function () {
 			var dependencyPaths = [];
 
 			for (var dependencyName in _packageJson.dependencies) {
-				var dependencyPath = _path2["default"].normalize(__dirname + "../../../node_modules");
-				dependencyPaths.push(dependencyPath + "/" + dependencyName + "/**/*");
+				var dependencyPath = _path2["default"].normalize(__dirname + "../../../../node_modules");
+				dependencyPaths.push(dependencyPath + "/" + dependencyName + "/**/{*.*,.*}");
 			}
 
 			mockConanLambda.dependencies.firstCall.args[0].should.eql(dependencyPaths);

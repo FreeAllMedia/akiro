@@ -24,10 +24,21 @@ export default class MockComponent {
 		});
 	}
 
+	property(propertyName) {
+		this[propertyName] = sinon.spy((newValue) => {
+			if (newValue) {
+				privateData(this)[propertyName] = newValue;
+			} else {
+				return privateData(this)[propertyName];
+			}
+		});
+	}
+
 	chainedProperty(methodName) {
 		this[methodName] = sinon.spy((newValue) => {
 			if (newValue) {
 				privateData(this)[methodName] = newValue;
+				return this;
 			} else {
 				return privateData(this)[methodName];
 			}

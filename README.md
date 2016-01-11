@@ -7,10 +7,10 @@ Akiro.js takes a list of packages and version numbers, invokes a special Lambda 
 * [Compatibility & Quality](#compatibility--quality)
 * [How it Works](#how-it-works)
 * [Installation](#installation)
-	* [Configuration](#configuration)
+  * [Configuration](#configuration)
 * [Usage](#usage)
-	* [akiro.initialize([callback])](#akiroinitializecallback)
-	* [akiro.package(packageList, s3BucketName, [options,] [callback])](#akiropackagepackagelist-s3bucketname-options-callback)
+  * [akiro.initialize([callback])](#akiroinitializecallback)
+  * [akiro.package(packageList, s3BucketName, [options,] [callback])](#akiropackagepackagelist-s3bucketname-options-callback)
 * [Contributing](#we-love-contributors)
 
 ## Compatibility & Quality
@@ -40,9 +40,9 @@ Akiro.js takes a list of packages and version numbers, invokes a special Lambda 
 
 * To use Akiro as a library in your own scripts, install locally via npm:
 
-	``` shell
-	npm install akiro --save-dev
-	```
+  ``` shell
+  npm install akiro --save-dev
+  ```
 
 ## Configuration
 
@@ -54,9 +54,11 @@ Akiro.js takes a list of packages and version numbers, invokes a special Lambda 
 
 # Usage
 
-Akiro has two primary functions: `.initialize()` and `.package()`.
+## Warning
 
-## akiro.initialize([callback])
+`akiro.initilize()` *must* be run once before `akiro.package()` will work! See the [How it Works Section](#how-it-works) for more details.
+
+## akiro.initialize(iamRoleName, [callback])
 
 Build and upload the `Akiro Packager` to S3, with an optional callback.
 
@@ -64,24 +66,23 @@ Build and upload the `Akiro Packager` to S3, with an optional callback.
 
 **Arguments:**
 
-argument|type						|description			|optional
-:-------|:--------------|:----------------|--------
-callback|function(error)|Called after initialization has completed, or an error has returned.|true
+argument   |type           |description       |optional
+:----------|:--------------|:-----------------|--------
+iamRoleName|String         |The name of the AWS IAM role to use for the lambda. Note: This is the *name*, not the *ARN*.|false
+callback   |function(error)|Called after initialization has completed, or an error has returned.|true
 
 **Example:**
 
 ``` javascript
 import Akiro from "akiro";
 
-const config = {
-	role: "IAMRoleNameHere"
-};
+const iamRoleName = "IAMRoleNameHere";
 
-const akiro = new Akiro(config);
+const akiro = new Akiro();
 
-akiro.initialize((error) => {
-	if (error) { throw error; }
-	console.log("Akiro initialization complete!");
+akiro.initialize(iamRoleName, (error) => {
+  if (error) { throw error; }
+  console.log("Akiro initialization complete!");
 });
 ```
 
@@ -91,19 +92,19 @@ Provide a list of package names and versions to build on AWS Lambda, then put in
 
 **Arguments:**
 
-argument						|type						|description						|optional
-:-------------------|:--------------|:----------------------|--------
-packageList					|Object         |List of each package and a corresponding version range to build.|false
-s3BucketName				|String         |S3 bucket where the package zip file is saved to.|false
-options							|Object         |Optional options object. See below for more information.|true
-callback						|function(error)|Called after initialization has completed, or an error has returned.|true
+argument    |type           |description            |optional
+:-----------|:--------------|:----------------------|--------
+packageList |Object         |List of each package and a corresponding version range to build.|false
+s3BucketName|String         |S3 bucket where the package zip file is saved to.|false
+options     |Object         |Optional options object. See below for more information.|true
+callback    |function(error)|Called after initialization has completed, or an error has returned.|true
 
 **Options:**
 
-option							|type						|default value	|description						
-:-------------------|:--------------|:--------------|:----------------
-s3FileName					|String         |"packages.zip"	|Provide an alternate filename to the default of "packages.zip".
-localFilePath				|String         |undefined			|If provided, the zip file will be downloaded from S3 to the designated file path.
+option       |type           |default value  |description            
+:------------|:--------------|:--------------|:----------------
+s3FileName   |String         |"packages.zip" |Provide an alternate filename to the default of "packages.zip".
+localFilePath|String         |undefined       |If provided, the zip file will be downloaded from S3 to the designated file path.
 
 **Example 1. Save Package Zip to Local File:**
 
@@ -117,19 +118,19 @@ import Akiro from "akiro";
 const akiro = new Akiro();
 
 const packageList = {
-	"async": "1.0.0",
-	"incognito": "^0.1.0"
+  "async": "1.0.0",
+  "incognito": "^0.1.0"
 };
 
 const bucketName = "bucketNameHere";
 
 const options = {
-	localFilePath: "./myLocalPackages.zip"
+  localFilePath: "./myLocalPackages.zip"
 };
 
 akiro.package(packageList, bucketName, options, (error, data) => {
-	if (error) { throw error; }
-	console.log(data.url); // http://branchNameHere.s3-us-east-1.amazonaws.com/packages.zip
+  if (error) { throw error; }
+  console.log(data.url); // http://branchNameHere.s3-us-east-1.amazonaws.com/packages.zip
 });
 ```
 
@@ -144,15 +145,15 @@ import Akiro from "akiro";
 const akiro = new Akiro();
 
 const packageList = {
-	"async": "1.0.0",
-	"incognito": "^0.1.0"
+  "async": "1.0.0",
+  "incognito": "^0.1.0"
 };
 
 const bucketName = "bucketNameHere";
 
 akiro.package(packageList, bucketName, (error, data) => {
-	if (error) { throw error; }
-	console.log(data.url); // http://branchNameHere.s3-us-east-1.amazonaws.com/packages.zip
+  if (error) { throw error; }
+  console.log(data.url); // http://branchNameHere.s3-us-east-1.amazonaws.com/packages.zip
 });
 ```
 
@@ -167,19 +168,19 @@ import Akiro from "akiro";
 const akiro = new Akiro();
 
 const packageList = {
-	"async": "1.0.0",
-	"incognito": "^0.1.0"
+  "async": "1.0.0",
+  "incognito": "^0.1.0"
 };
 
 const bucketName = "bucketNameHere";
 
 const options = {
-	s3FileName: "differentName.zip"
+  s3FileName: "differentName.zip"
 };
 
 akiro.package(packageList, bucketName, options, (error, data) => {
-	if (error) { throw error; }
-	console.log(data.url); // http://branchNameHere.s3-us-east-1.amazonaws.com/differentName.zip
+  if (error) { throw error; }
+  console.log(data.url); // http://branchNameHere.s3-us-east-1.amazonaws.com/differentName.zip
 });
 ```
 
@@ -188,14 +189,14 @@ akiro.package(packageList, bucketName, options, (error, data) => {
 Want to contribute to this repo? Our teams welcome all quality contributions!
 
 * **"What is a quality contribution?"**
-	* **All submitted code must have zero issues when linted against the supplied `.eslintrc` guidelines.**
-	 	* All `.eslintrc` guidelines should be followed *as-is*, with exceptions for impossible/impractical situations (such as when violating the `new-cap` rule by utilizing 3rd-party libraries that has Uppercase function names).
-	* **Test coverage must remain at 100%.**
-		* Please don't rely upon the core devs to write post-hoc tests. This software should remain test-*driven*.
-		* If there are serious considerations as to why the 100% limit should be broken, please submit a new issue discussing it.
-	* **Tests must be well-designed.**
-		* Each test should be carefully designed so that it is covering off on new scenarios, while avoiding overlap with others.
-		* One assertion per test (*it* block). Please don't make us comment out a bunch of assertions to find out which one failed.
+  * **All submitted code must have zero issues when linted against the supplied `.eslintrc` guidelines.**
+     * All `.eslintrc` guidelines should be followed *as-is*, with exceptions for impossible/impractical situations (such as when violating the `new-cap` rule by utilizing 3rd-party libraries that has Uppercase function names).
+  * **Test coverage must remain at 100%.**
+    * Please don't rely upon the core devs to write post-hoc tests. This software should remain test-*driven*.
+    * If there are serious considerations as to why the 100% limit should be broken, please submit a new issue discussing it.
+  * **Tests must be well-designed.**
+    * Each test should be carefully designed so that it is covering off on new scenarios, while avoiding overlap with others.
+    * One assertion per test (*it* block). Please don't make us comment out a bunch of assertions to find out which one failed.
 * **"What if I'm unsure about something?"**
-	* **Create an issue**
-		* We watch our issues very carefully. Please utilize it for all questions, comments, and requests.
+  * **Create an issue**
+    * We watch our issues very carefully. Please utilize it for all questions, comments, and requests.

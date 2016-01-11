@@ -1,9 +1,10 @@
 import Akiro from "../../lib/akiro.js";
+import { ConanAwsLambdaPlugin } from "conan";
 import MockConan from "../helpers/mockConan.js";
 import path from "path";
 import { dependencies } from "../../../package.json";
 
-describe("akiro.initialize(callback)", () => {
+describe("akiro.initialize(iamRoleName, callback)", () => {
 	let config,
 			akiro,
 			callback,
@@ -21,14 +22,17 @@ describe("akiro.initialize(callback)", () => {
 		lambdaFilePath = path.normalize(__dirname + "../../../lib/akiro/packagers/akiro.packager.nodejs.js");
 
 		config = {
-			conan: mockConan = new MockConan(),
-			role: lambdaRole
+			conan: mockConan = new MockConan()
 		};
 
 		akiro = new Akiro(config);
 
 		callback = done;
-		akiro.initialize(callback);
+		akiro.initialize(lambdaRole, callback);
+	});
+
+	it("should use the ConanAwsLambdaPlugin", () => {
+		mockConan.use.calledWith(ConanAwsLambdaPlugin).should.be.true;
 	});
 
 	describe("Akiro Lambda", () => {
@@ -56,8 +60,8 @@ describe("akiro.initialize(callback)", () => {
 			let dependencyPaths = [];
 
 			for(let dependencyName in dependencies) {
-				const dependencyPath = path.normalize(__dirname + "../../../node_modules");
-				dependencyPaths.push(`${dependencyPath}/${dependencyName}/**/*`);
+				const dependencyPath = path.normalize(__dirname + "../../../../node_modules");
+				dependencyPaths.push(`${dependencyPath}/${dependencyName}/**/{*.*,.*}`);
 			}
 
 			mockConanLambda.dependencies.firstCall.args[0].should.eql(dependencyPaths);

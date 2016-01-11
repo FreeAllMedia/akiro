@@ -25,32 +25,40 @@ var _path = require("path");
 var _path2 = _interopRequireDefault(_path);
 
 var Akiro = (function () {
-	function Akiro(config) {
+	function Akiro() {
+		var config = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
 		_classCallCheck(this, Akiro);
 
 		var _ = (0, _incognito2["default"])(this);
 
 		_.config = config;
-		_.conan = _.config.conan || new _conan2["default"]();
+		_.config.region = _.config.region || "us-east-1";
+
+		this.conan = _.config.conan || new _conan2["default"]({ region: _.config.region });
 	}
 
 	_createClass(Akiro, [{
 		key: "initialize",
-		value: function initialize(callback) {
-			var conan = (0, _incognito2["default"])(this).conan;
+		value: function initialize(iamRoleName, callback) {
+			var conan = this.conan;
+
+			conan.use(_conan.ConanAwsLambdaPlugin);
 
 			var lambdaName = "Akiro";
-			var lambdaRole = "AkiroLambda";
+			var lambdaRole = iamRoleName;
 			var lambdaFilePath = __dirname + "/akiro/packagers/akiro.packager.nodejs.js";
 
 			var packageDependencyNames = Object.keys(_packageJson.dependencies);
 
 			var packageDependencyPaths = [];
 			packageDependencyNames.forEach(function (packageDependencyName) {
-				var nodeModulesDirectoryPath = _path2["default"].normalize(__dirname + "/../node_modules");
-				var packageDependencyPath = nodeModulesDirectoryPath + "/" + packageDependencyName + "/**/*";
+				var nodeModulesDirectoryPath = _path2["default"].normalize(__dirname + "/../../node_modules");
+				var packageDependencyPath = nodeModulesDirectoryPath + "/" + packageDependencyName + "/**/{*.*,.*}";
 				packageDependencyPaths.push(packageDependencyPath);
 			});
+
+			//console.log(packageDependencyPaths);
 
 			conan.lambda(lambdaName, lambdaFilePath, lambdaRole).dependencies(packageDependencyPaths);
 

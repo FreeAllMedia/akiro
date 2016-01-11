@@ -2,6 +2,7 @@ import MockComponent from "./mockComponent.js";
 
 export default class MockConan extends MockComponent {
 	initialize() {
+		this.property("use");
 		this.component("lambda", MockConanLambda);
 		this.asyncMethod("deploy");
 	}
