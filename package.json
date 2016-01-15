@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/FreeAllMedia/akiro.git"
+    "url": "git+https://github.com/FreeAllMedia/akiro.git"
   },
   "keywords": [
     "akiro"
@@ -35,10 +35,13 @@
     "conan": "0.0.8",
     "flowsync": "^0.1.12",
     "fs-extra": "^0.26.4",
+    "glob": "^6.0.4",
     "incognito": "^0.1.4",
-    "temp": "^0.8.3"
+    "temp": "^0.8.3",
+    "unzip2": "^0.2.5"
   },
   "devDependencies": {
+    "array-difference": "0.0.1",
     "babel": "^5.5.6",
     "babel-eslint": "^3.1.20",
     "babel-plugin-rewire": "^0.1.22",
