@@ -25,13 +25,15 @@ describe("akiro.initialize(iamRoleName, callback)", function () {
 	    lambdaName = undefined,
 	    lambdaRole = undefined,
 	    lambdaFilePath = undefined,
+	    handlerFilePath = undefined,
 	    mockConan = undefined,
 	    mockConanLambda = undefined;
 
 	beforeEach(function (done) {
-		lambdaName = "Akiro";
+		lambdaName = "akiroPackager";
 		lambdaRole = "AkiroLambda";
-		lambdaFilePath = _path2["default"].normalize(__dirname + "../../../lib/akiro/packagers/akiro.packager.nodejs.js");
+		lambdaFilePath = _path2["default"].normalize(__dirname + "../../../lib/akiro/packagers/nodejs/akiroPackager.js");
+		handlerFilePath = _path2["default"].normalize(__dirname + "../../../lib/akiro/packagers/nodejs/handler.js");
 
 		config = {
 			conan: mockConan = new _helpersMockConanJs2["default"]()
@@ -60,18 +62,18 @@ describe("akiro.initialize(iamRoleName, callback)", function () {
 			mockConanLambda.runtime.firstCall.args[0].should.eql("nodejs");
 		});
 
-		it("should use the supplied lambdaFilePath", function () {
-			mockConanLambda.filePath.firstCall.args[0].should.eql(lambdaFilePath);
+		it("should use the supplied handlerFilePath", function () {
+			mockConanLambda.filePath.firstCall.args[0].should.eql(handlerFilePath);
 		});
 
 		it("should use the supplied role", function () {
 			mockConanLambda.role.firstCall.args[0].should.eql(lambdaRole);
 		});
 
-		it("should include all dependencies", function () {
-			var dependencyPaths = [];
+		it("should include akiroPackager and dependencies", function () {
+			var dependencyPaths = [lambdaFilePath];
 
-			for (var dependencyName in _packageJson.dependencies) {
+			for (var dependencyName in _packageJson.packagerDependencies) {
 				var dependencyPath = _path2["default"].normalize(__dirname + "../../../../node_modules");
 				dependencyPaths.push(dependencyPath + "/" + dependencyName + "/**/{*.*,.*}");
 			}

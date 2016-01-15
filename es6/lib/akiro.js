@@ -1,6 +1,6 @@
 import privateData from "incognito";
 import Conan, { ConanAwsLambdaPlugin } from "conan";
-import { dependencies } from "../../package.json";
+import { packagerDependencies } from "../../package.json";
 import path from "path";
 
 export default class Akiro {
@@ -22,13 +22,16 @@ export default class Akiro {
 
 		conan.use(ConanAwsLambdaPlugin);
 
-		const lambdaName = "Akiro";
+		const lambdaName = "akiroPackager";
 		const lambdaRole = iamRoleName;
-		const lambdaFilePath = __dirname + "/akiro/packagers/akiro.packager.nodejs.js";
+		const lambdaFilePath = __dirname + "/akiro/packagers/nodejs/akiroPackager.js";
+		const handlerFilePath = __dirname + "/akiro/packagers/nodejs/handler.js";
 
-		const packageDependencyNames = Object.keys(dependencies);
+		const packageDependencyNames = Object.keys(packagerDependencies);
 
-		const packageDependencyPaths = [];
+		const packageDependencyPaths = [
+			lambdaFilePath
+		];
 		packageDependencyNames.forEach((packageDependencyName) => {
 			const nodeModulesDirectoryPath = path.normalize(`${__dirname}/../../node_modules`);
 			const packageDependencyPath = `${nodeModulesDirectoryPath}/${packageDependencyName}/**/{*.*,.*}`;
@@ -38,7 +41,7 @@ export default class Akiro {
 		//console.log(packageDependencyPaths);
 
 		conan
-			.lambda(lambdaName, lambdaFilePath, lambdaRole)
+			.lambda(lambdaName, handlerFilePath, lambdaRole)
 				.dependencies(packageDependencyPaths);
 
 		conan

@@ -45,13 +45,14 @@ var Akiro = (function () {
 
 			conan.use(_conan.ConanAwsLambdaPlugin);
 
-			var lambdaName = "Akiro";
+			var lambdaName = "akiroPackager";
 			var lambdaRole = iamRoleName;
-			var lambdaFilePath = __dirname + "/akiro/packagers/akiro.packager.nodejs.js";
+			var lambdaFilePath = __dirname + "/akiro/packagers/nodejs/akiroPackager.js";
+			var handlerFilePath = __dirname + "/akiro/packagers/nodejs/handler.js";
 
-			var packageDependencyNames = Object.keys(_packageJson.dependencies);
+			var packageDependencyNames = Object.keys(_packageJson.packagerDependencies);
 
-			var packageDependencyPaths = [];
+			var packageDependencyPaths = [lambdaFilePath];
 			packageDependencyNames.forEach(function (packageDependencyName) {
 				var nodeModulesDirectoryPath = _path2["default"].normalize(__dirname + "/../../node_modules");
 				var packageDependencyPath = nodeModulesDirectoryPath + "/" + packageDependencyName + "/**/{*.*,.*}";
@@ -60,7 +61,7 @@ var Akiro = (function () {
 
 			//console.log(packageDependencyPaths);
 
-			conan.lambda(lambdaName, lambdaFilePath, lambdaRole).dependencies(packageDependencyPaths);
+			conan.lambda(lambdaName, handlerFilePath, lambdaRole).dependencies(packageDependencyPaths);
 
 			conan.deploy(callback);
 		}

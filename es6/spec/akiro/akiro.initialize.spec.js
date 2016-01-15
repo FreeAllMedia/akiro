@@ -2,7 +2,7 @@ import Akiro from "../../lib/akiro.js";
 import { ConanAwsLambdaPlugin } from "conan";
 import MockConan from "../helpers/mockConan.js";
 import path from "path";
-import { dependencies } from "../../../package.json";
+import { packagerDependencies } from "../../../package.json";
 
 describe("akiro.initialize(iamRoleName, callback)", () => {
 	let config,
@@ -12,14 +12,16 @@ describe("akiro.initialize(iamRoleName, callback)", () => {
 			lambdaName,
 			lambdaRole,
 			lambdaFilePath,
+			handlerFilePath,
 
 			mockConan,
 			mockConanLambda;
 
 	beforeEach(done => {
-		lambdaName = "Akiro";
+		lambdaName = "akiroPackager";
 		lambdaRole = "AkiroLambda";
-		lambdaFilePath = path.normalize(__dirname + "../../../lib/akiro/packagers/akiro.packager.nodejs.js");
+		lambdaFilePath = path.normalize(__dirname + "../../../lib/akiro/packagers/nodejs/akiroPackager.js");
+		handlerFilePath = path.normalize(__dirname + "../../../lib/akiro/packagers/nodejs/handler.js");
 
 		config = {
 			conan: mockConan = new MockConan()
@@ -48,18 +50,20 @@ describe("akiro.initialize(iamRoleName, callback)", () => {
 			mockConanLambda.runtime.firstCall.args[0].should.eql("nodejs");
 		});
 
-		it("should use the supplied lambdaFilePath", () => {
-			mockConanLambda.filePath.firstCall.args[0].should.eql(lambdaFilePath);
+		it("should use the supplied handlerFilePath", () => {
+			mockConanLambda.filePath.firstCall.args[0].should.eql(handlerFilePath);
 		});
 
 		it("should use the supplied role", () => {
 			mockConanLambda.role.firstCall.args[0].should.eql(lambdaRole);
 		});
 
-		it("should include all dependencies", () => {
-			let dependencyPaths = [];
+		it("should include akiroPackager and dependencies", () => {
+			let dependencyPaths = [
+				lambdaFilePath
+			];
 
-			for(let dependencyName in dependencies) {
+			for(let dependencyName in packagerDependencies) {
 				const dependencyPath = path.normalize(__dirname + "../../../../node_modules");
 				dependencyPaths.push(`${dependencyPath}/${dependencyName}/**/{*.*,.*}`);
 			}
