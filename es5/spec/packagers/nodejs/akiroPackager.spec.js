@@ -183,7 +183,7 @@ describe("AkiroPackager(event, context)", function () {
 
 	describe("akiroPackager.AWS", function () {
 		it("should be set to context.AWS if provided", function () {
-			akiroPackager.AWS.should.eql(MockAWS);
+			akiroPackager.AWS.should.eql(mockAWS);
 		});
 
 		it("should be set to the AWS package if not provided", function () {
@@ -271,13 +271,13 @@ describe("AkiroPackager(event, context)", function () {
 		});
 	});
 
-	it("should instantiate S3 with the designated region", function () {
+	xit("should instantiate S3 with the designated region", function () {
 		s3ConstructorSpy.calledWith({
 			region: event.region
 		});
 	});
 
-	it("should copy the .zip file to the designated S3 options", function () {
+	xit("should copy the .zip file to the designated S3 options", function () {
 		var putObjectParameters = {
 			Bucket: "",
 			Key: "",
