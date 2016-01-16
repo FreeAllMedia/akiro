@@ -38,7 +38,7 @@ export default class AkiroPackager {
 			(temporaryDirectoryPath, done) => {
 				const packageJsonFilePath = `${temporaryDirectoryPath}/package.json`;
 				const packageJson = require(packageJsonFilePath);
-				packageJson.dependencies = event.packages;
+				packageJson.dependencies = { [event.package.name]: event.package.version };
 				fileSystem.writeFile(packageJsonFilePath, JSON.stringify(packageJson), (error) => {
 					done(error, temporaryDirectoryPath);
 				});

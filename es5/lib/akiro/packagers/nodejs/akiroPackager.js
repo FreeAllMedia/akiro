@@ -8,6 +8,8 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var _temp = require("temp");
@@ -70,7 +72,7 @@ var AkiroPackager = (function () {
 			}, function (temporaryDirectoryPath, done) {
 				var packageJsonFilePath = temporaryDirectoryPath + "/package.json";
 				var packageJson = require(packageJsonFilePath);
-				packageJson.dependencies = event.packages;
+				packageJson.dependencies = _defineProperty({}, event["package"].name, event["package"].version);
 				_fsExtra2["default"].writeFile(packageJsonFilePath, JSON.stringify(packageJson), function (error) {
 					done(error, temporaryDirectoryPath);
 				});
