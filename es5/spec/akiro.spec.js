@@ -10,6 +10,10 @@ var _conan = require("conan");
 
 var _conan2 = _interopRequireDefault(_conan);
 
+var _temp = require("temp");
+
+var _temp2 = _interopRequireDefault(_temp);
+
 describe("Akiro(config)", function () {
 	var akiro = undefined,
 	    config = undefined,
@@ -63,6 +67,24 @@ describe("Akiro(config)", function () {
 		});
 		it("should be used by Conan", function () {
 			akiro.conan.config.region.should.eql("us-east-1");
+		});
+	});
+
+	describe("akiro.temp", function () {
+		describe("(When akiro.config.temp is set)", function () {
+			it("should set akiro.temp to akiro.config.temp", function () {
+				var mockTemp = {};
+				config = {
+					temp: mockTemp
+				};
+				akiro = new _libAkiroJs2["default"](config);
+				akiro.temp.should.eql(mockTemp);
+			});
+		});
+		describe("(When akiro.config.temp is NOT set)", function () {
+			it("should set akiro.temp to the temp package", function () {
+				akiro.temp.should.eql(_temp2["default"]);
+			});
 		});
 	});
 });

@@ -1,6 +1,6 @@
 "use strict";
 
-var _libAkiroPackagersNodejsHandlerJs = require("../../../lib/akiro/packagers/nodejs/handler.js");
+var _libAkiroBuildersNodejsHandlerJs = require("../../../lib/akiro/builders/nodejs/handler.js");
 
 describe("handler(event, context)", function () {
 	var event = undefined,
@@ -20,7 +20,7 @@ describe("handler(event, context)", function () {
 			}
 		};
 
-		(0, _libAkiroPackagersNodejsHandlerJs.handler)(event, context);
+		(0, _libAkiroBuildersNodejsHandlerJs.handler)(event, context);
 	});
 
 	it("should instantiate the lambda class with the event", function () {

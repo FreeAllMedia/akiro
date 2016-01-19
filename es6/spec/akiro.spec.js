@@ -1,5 +1,6 @@
 import Akiro from "../lib/akiro.js";
 import Conan from "conan";
+import temp from "temp";
 
 describe("Akiro(config)", () => {
 	let akiro,
@@ -55,6 +56,24 @@ describe("Akiro(config)", () => {
 		});
 		it("should be used by Conan", () => {
 			akiro.conan.config.region.should.eql("us-east-1");
+		});
+	});
+
+	describe("akiro.temp", () => {
+		describe("(When akiro.config.temp is set)", () => {
+			it("should set akiro.temp to akiro.config.temp", () => {
+				const mockTemp = {};
+				config = {
+					temp: mockTemp
+				};
+				akiro = new Akiro(config);
+				akiro.temp.should.eql(mockTemp);
+			});
+		});
+		describe("(When akiro.config.temp is NOT set)", () => {
+			it("should set akiro.temp to the temp package", () => {
+				akiro.temp.should.eql(temp);
+			});
 		});
 	});
 });

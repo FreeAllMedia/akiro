@@ -1,9 +1,8 @@
 import sinon from "sinon";
 import fileSystem from "fs-extra";
 
-export default function createMockExec(temporaryDirectoryPath, nodeModulesDirectoryPath) {
+export default function createMockExec(temporaryDirectoryPath, nodeModulesDirectoryPath, nodeCliPath) {
 	return sinon.spy((command, callback) => {
-		const nodeCliPath = `${temporaryDirectoryPath}/node_modules/npm/bin/npm-cli.js`;
 		switch(command) {
 			case `cd ${temporaryDirectoryPath};node ${nodeCliPath} init -y`:
 				const newPackageJson = require(`${__dirname}/../fixtures/newPackage.json`);

@@ -21,7 +21,10 @@ class MockConanLambda extends MockComponent {
 			"timeout",
 			"publish",
 			"bucket",
-			"packages",
+			"packages"
+		);
+
+		this.chainedMultipleValueProperty(
 			"dependencies"
 		);
 

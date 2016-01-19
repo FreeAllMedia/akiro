@@ -14,7 +14,7 @@ var _helpersMockAwsJs = require("../helpers/mockAws.js");
 
 var _helpersMockAwsJs2 = _interopRequireDefault(_helpersMockAwsJs);
 
-describe("akiro.package(packageList, [localZipFilePath,] callback)", function () {
+xdescribe("akiro.package(packageList, [localZipFilePath,] callback)", function () {
 	var bucketName = undefined,
 	    config = undefined,
 	    akiro = undefined,

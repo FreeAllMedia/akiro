@@ -34,6 +34,17 @@ export default class MockComponent {
 		});
 	}
 
+	chainedMultipleValueProperty(methodName) {
+		this[methodName] = sinon.spy((...newValues) => {
+			if (newValues.length > 0) {
+				privateData(this)[methodName] = newValues;
+				return this;
+			} else {
+				return privateData(this)[methodName];
+			}
+		});
+	}
+
 	chainedProperty(methodName) {
 		this[methodName] = sinon.spy((newValue) => {
 			if (newValue) {

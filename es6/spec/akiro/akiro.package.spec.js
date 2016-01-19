@@ -2,7 +2,7 @@ import Akiro from "../../lib/akiro.js";
 import sinon from "sinon";
 import MockAWS from "../helpers/mockAws.js";
 
-describe("akiro.package(packageList, [localZipFilePath,] callback)", () => {
+xdescribe("akiro.package(packageList, [localZipFilePath,] callback)", () => {
 	let bucketName,
 			config,
 			akiro,

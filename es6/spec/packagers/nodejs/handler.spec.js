@@ -1,4 +1,4 @@
-import { handler } from "../../../lib/akiro/packagers/nodejs/handler.js";
+import { handler } from "../../../lib/akiro/builders/nodejs/handler.js";
 
 describe("handler(event, context)", () => {
 	let event,

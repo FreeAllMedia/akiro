@@ -21,7 +21,7 @@
     "url": "https://github.com/FreeAllMedia/akiro/issues"
   },
   "homepage": "https://github.com/FreeAllMedia/akiro",
-  "packagerDependencies": {
+  "builderDependencies": {
     "aws-sdk": "^2.2.28",
     "archiver": "^0.21.0",
     "temp": "^0.8.3",
@@ -32,7 +32,7 @@
   "dependencies": {
     "archiver": "^0.21.0",
     "aws-sdk": "^2.2.28",
-    "conan": "0.0.8",
+    "conan": "0.0.14",
     "flowsync": "^0.1.12",
     "fs-extra": "^0.26.4",
     "glob": "^6.0.4",
