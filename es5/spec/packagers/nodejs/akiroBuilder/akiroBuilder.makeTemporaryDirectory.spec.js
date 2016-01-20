@@ -4,6 +4,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "d
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 var _libAkiroBuildersNodejsAkiroBuilderJs = require("../../../../lib/akiro/builders/nodejs/akiroBuilder.js");
 
 var _libAkiroBuildersNodejsAkiroBuilderJs2 = _interopRequireDefault(_libAkiroBuildersNodejsAkiroBuilderJs);
@@ -27,6 +29,10 @@ var _helpersMockExecJs2 = _interopRequireDefault(_helpersMockExecJs);
 var _helpersMockTempJs = require("../../../helpers/mockTemp.js");
 
 var _helpersMockTempJs2 = _interopRequireDefault(_helpersMockTempJs);
+
+var _fsExtra = require("fs-extra");
+
+var _fsExtra2 = _interopRequireDefault(_fsExtra);
 
 _temp2["default"].track();
 
@@ -66,7 +72,10 @@ describe("AkiroBuilder(event, context)", function () {
 		nodeModulesDirectoryPath = __dirname + "/../../../../../node_modules";
 
 		mockNpmPath = nodeModulesDirectoryPath + "/npm/bin/npm-cli.js";
-		mockExec = (0, _helpersMockExecJs2["default"])(temporaryDirectoryPath, nodeModulesDirectoryPath, mockNpmPath);
+		mockExec = (0, _helpersMockExecJs2["default"])(_defineProperty({}, "cd " + temporaryDirectoryPath + ";node " + mockNpmPath + " init -y", function (commandDone) {
+			_fsExtra2["default"].copySync(__dirname + "/../../../fixtures/newPackage.json", temporaryDirectoryPath + "/package.json");
+			commandDone();
+		}));
 		mockTemp = (0, _helpersMockTempJs2["default"])(temporaryDirectoryPath);
 
 		s3ConstructorSpy = _sinon2["default"].spy();

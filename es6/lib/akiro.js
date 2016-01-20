@@ -6,6 +6,7 @@ import temp from "temp";
 import AkiroBuilder from "./akiro/builders/nodejs/akiroBuilder.js";
 import Async from "flowsync";
 import fileSystem from "fs-extra";
+import { exec } from "child_process";
 
 export default class Akiro {
 	constructor(config={}) {
@@ -18,7 +19,8 @@ export default class Akiro {
 		this.conan.use(ConanAwsLambdaPlugin);
 
 		this.temp = _.config.temp || temp;
-		this.temp.track();
+		this.exec = _.config.exec || exec;
+		// this.temp.track();
 	}
 
 	get config() {
@@ -36,7 +38,7 @@ export default class Akiro {
 		const lambda = conan.lambda(lambdaName, handlerFilePath, lambdaRole);
 		lambda.dependencies(lambdaFilePath);
 
-		const addBuilderDependencies = (dependencyName, dependencyVersionRange) => {
+		const createBuilderTask = (dependencyName, dependencyVersionRange) => {
 			return (done) => {
 				this.temp.mkdir(`akiro.initialize.${dependencyName}`, (error, temporaryDirectoryPath) => {
 					const mockTemp = {
@@ -52,17 +54,17 @@ export default class Akiro {
 						}
 					};
 
+					const npmPath = path.normalize(`${__dirname}/../../node_modules/npm/bin/npm-cli.js`);
+
 					const context = {
+						exec: this.exec,
+						npmPath: npmPath,
 						temp: mockTemp,
 						succeed: () => {
-							lambda.dependencies(`${temporaryDirectoryPath}/node_modules/**/{*.*,.*}`);
+							lambda.dependencies(`${temporaryDirectoryPath}/node_modules/${event.package.name}/**/*`);
 							done();
-						},
-						fail: (failError) => {
-							done(failError);
 						}
 					};
-
 					const builder = new AkiroBuilder(event, context);
 					builder.invoke(event, context);
 				});
@@ -75,18 +77,13 @@ export default class Akiro {
 
 				for (let dependencyName in builderDependencies) {
 					const dependencyVersionRange = builderDependencies[dependencyName];
-					builderDependencyTasks.push(addBuilderDependencies(dependencyName, dependencyVersionRange));
+					builderDependencyTasks.push(createBuilderTask(dependencyName, dependencyVersionRange));
 				}
 
-				Async.parallel(builderDependencyTasks, done);
-			},
-			(done) => {
-				conan.deploy(done);
-			},
-			(done) => {
-				done();
-				// this.temp.cleanup(done);
+				Async.series(builderDependencyTasks, done);
 			}
-		], callback);
+		], () => {
+			conan.deploy(callback);
+		});
 	}
 }

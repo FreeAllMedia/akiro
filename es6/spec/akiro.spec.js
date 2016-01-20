@@ -1,6 +1,7 @@
 import Akiro from "../lib/akiro.js";
 import Conan from "conan";
 import temp from "temp";
+import { exec } from "child_process";
 
 describe("Akiro(config)", () => {
 	let akiro,
@@ -62,7 +63,9 @@ describe("Akiro(config)", () => {
 	describe("akiro.temp", () => {
 		describe("(When akiro.config.temp is set)", () => {
 			it("should set akiro.temp to akiro.config.temp", () => {
-				const mockTemp = {};
+				const mockTemp = {
+					track: () => {}
+				};
 				config = {
 					temp: mockTemp
 				};
@@ -73,6 +76,24 @@ describe("Akiro(config)", () => {
 		describe("(When akiro.config.temp is NOT set)", () => {
 			it("should set akiro.temp to the temp package", () => {
 				akiro.temp.should.eql(temp);
+			});
+		});
+	});
+
+	describe("akiro.exec", () => {
+		describe("(When akiro.config.exec is set)", () => {
+			it("should set akiro.exec to akiro.config.exec", () => {
+				const mockExec = {};
+				config = {
+					exec: mockExec
+				};
+				akiro = new Akiro(config);
+				akiro.exec.should.eql(mockExec);
+			});
+		});
+		describe("(When akiro.config.exec is NOT set)", () => {
+			it("should set akiro.exec to the exec package", () => {
+				akiro.exec.should.eql(exec);
 			});
 		});
 	});

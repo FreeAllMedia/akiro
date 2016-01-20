@@ -48,7 +48,12 @@ describe("AkiroBuilder(event, context)", () => {
 		nodeModulesDirectoryPath = `${__dirname}/../../../../../node_modules`;
 
 		mockNpmPath = `${nodeModulesDirectoryPath}/npm/bin/npm-cli.js`;
-		mockExec = createMockExec(temporaryDirectoryPath, nodeModulesDirectoryPath, mockNpmPath);
+		mockExec = createMockExec({
+			[`cd ${temporaryDirectoryPath};node ${mockNpmPath} init -y`]:	(commandDone) => {
+				fileSystem.copySync(`${__dirname}/../../../fixtures/newPackage.json`, `${temporaryDirectoryPath}/package.json`);
+				commandDone();
+			}
+		});
 		mockTemp = createMockTemp(temporaryDirectoryPath);
 		mockFileSystem = {
 			writeFile: sinon.spy(fileSystem.writeFile),

@@ -5,6 +5,7 @@ import fileSystem from "fs-extra";
 import packageJson from "../../../../../package.json";
 import createMockExec from "../../../helpers/mockExec.js";
 import createMockTemp from "../../../helpers/mockTemp.js";
+import path from "path";
 
 temp.track();
 
@@ -46,10 +47,16 @@ describe("AkiroBuilder(event, context)", () => {
 			}
 		};
 
-		nodeModulesDirectoryPath = `${__dirname}/../../../../../node_modules`;
+		nodeModulesDirectoryPath = path.normalize(`${__dirname}/../../../../../node_modules`);
 
 		mockNpmPath = `${nodeModulesDirectoryPath}/npm/bin/npm-cli.js`;
-		mockExec = createMockExec(temporaryDirectoryPath, nodeModulesDirectoryPath, mockNpmPath);
+		mockExec = createMockExec({
+			[`cd ${temporaryDirectoryPath};node ${mockNpmPath} install`]: (commandDone) => {
+				fileSystem.copy(`${nodeModulesDirectoryPath}/async`, `${temporaryDirectoryPath}/node_modules/async`, (error) => {
+					commandDone(error);
+				});
+			}
+		});
 		mockTemp = createMockTemp(temporaryDirectoryPath);
 
 		s3ConstructorSpy = sinon.spy();

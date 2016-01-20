@@ -36,6 +36,10 @@ var _helpersMockTempJs = require("../../../helpers/mockTemp.js");
 
 var _helpersMockTempJs2 = _interopRequireDefault(_helpersMockTempJs);
 
+var _fsExtra = require("fs-extra");
+
+var _fsExtra2 = _interopRequireDefault(_fsExtra);
+
 _temp2["default"].track();
 
 describe("AkiroBuilder(event, context)", function () {
@@ -74,7 +78,7 @@ describe("AkiroBuilder(event, context)", function () {
 		nodeModulesDirectoryPath = __dirname + "/../../../../../node_modules";
 
 		mockNpmPath = nodeModulesDirectoryPath + "/npm/bin/npm-cli.js";
-		mockExec = (0, _helpersMockExecJs2["default"])(temporaryDirectoryPath, nodeModulesDirectoryPath, mockNpmPath);
+		mockExec = (0, _helpersMockExecJs2["default"])({});
 		mockTemp = (0, _helpersMockTempJs2["default"])(temporaryDirectoryPath);
 
 		mockS3 = {

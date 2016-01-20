@@ -14,6 +14,8 @@ var _temp = require("temp");
 
 var _temp2 = _interopRequireDefault(_temp);
 
+var _child_process = require("child_process");
+
 describe("Akiro(config)", function () {
 	var akiro = undefined,
 	    config = undefined,
@@ -73,7 +75,9 @@ describe("Akiro(config)", function () {
 	describe("akiro.temp", function () {
 		describe("(When akiro.config.temp is set)", function () {
 			it("should set akiro.temp to akiro.config.temp", function () {
-				var mockTemp = {};
+				var mockTemp = {
+					track: function track() {}
+				};
 				config = {
 					temp: mockTemp
 				};
@@ -84,6 +88,24 @@ describe("Akiro(config)", function () {
 		describe("(When akiro.config.temp is NOT set)", function () {
 			it("should set akiro.temp to the temp package", function () {
 				akiro.temp.should.eql(_temp2["default"]);
+			});
+		});
+	});
+
+	describe("akiro.exec", function () {
+		describe("(When akiro.config.exec is set)", function () {
+			it("should set akiro.exec to akiro.config.exec", function () {
+				var mockExec = {};
+				config = {
+					exec: mockExec
+				};
+				akiro = new _libAkiroJs2["default"](config);
+				akiro.exec.should.eql(mockExec);
+			});
+		});
+		describe("(When akiro.config.exec is NOT set)", function () {
+			it("should set akiro.exec to the exec package", function () {
+				akiro.exec.should.eql(_child_process.exec);
 			});
 		});
 	});

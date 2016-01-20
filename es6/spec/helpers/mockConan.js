@@ -24,7 +24,7 @@ class MockConanLambda extends MockComponent {
 			"packages"
 		);
 
-		this.chainedMultipleValueProperty(
+		this.chainedMultipleValueAggregateProperty(
 			"dependencies"
 		);
 
