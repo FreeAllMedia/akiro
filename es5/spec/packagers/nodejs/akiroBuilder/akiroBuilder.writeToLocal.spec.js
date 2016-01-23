@@ -18,10 +18,6 @@ var _temp = require("temp");
 
 var _temp2 = _interopRequireDefault(_temp);
 
-var _node_modulesAsyncPackageJson = require("../../../../../node_modules/async/package.json");
-
-var _node_modulesAsyncPackageJson2 = _interopRequireDefault(_node_modulesAsyncPackageJson);
-
 var _helpersMockExecJs = require("../../../helpers/mockExec.js");
 
 var _helpersMockExecJs2 = _interopRequireDefault(_helpersMockExecJs);
@@ -34,12 +30,21 @@ var _fsExtra = require("fs-extra");
 
 var _fsExtra2 = _interopRequireDefault(_fsExtra);
 
+var _unzip2 = require("unzip2");
+
+var _unzip22 = _interopRequireDefault(_unzip2);
+
+var _flowsync = require("flowsync");
+
+var _flowsync2 = _interopRequireDefault(_flowsync);
+
 _temp2["default"].track();
 
-xdescribe("AkiroBuilder(event, context)", function () {
+describe("AkiroBuilder(event, context)", function () {
 	var event = undefined,
 	    context = undefined,
 	    akiroBuilder = undefined,
+	    localFilePath = undefined,
 	    nodeModulesDirectoryPath = undefined,
 	    temporaryDirectoryPath = undefined,
 	    mockExec = undefined,
@@ -61,10 +66,9 @@ xdescribe("AkiroBuilder(event, context)", function () {
 	});
 
 	beforeEach(function (done) {
+		var _createMockExec;
 
 		event = {
-			region: "us-east-1",
-			bucket: "akiro.test",
 			"package": {
 				name: "async",
 				version: "1.0.0"
@@ -74,10 +78,16 @@ xdescribe("AkiroBuilder(event, context)", function () {
 		nodeModulesDirectoryPath = __dirname + "/../../../../../node_modules";
 
 		mockNpmPath = nodeModulesDirectoryPath + "/npm/bin/npm-cli.js";
-		mockExec = (0, _helpersMockExecJs2["default"])(_defineProperty({}, "cd " + temporaryDirectoryPath + ";node " + mockNpmPath + " init -y", function (commandDone) {
+		mockExec = (0, _helpersMockExecJs2["default"])((_createMockExec = {}, _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + mockNpmPath + " install", function (commandDone) {
+			_fsExtra2["default"].copy(nodeModulesDirectoryPath + "/async", temporaryDirectoryPath + "/node_modules/async", function (error) {
+				commandDone(error);
+			});
+		}), _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + mockNpmPath + " init -y", function (execDone) {
 			_fsExtra2["default"].copySync(__dirname + "/../../../fixtures/newPackage.json", temporaryDirectoryPath + "/package.json");
-			commandDone();
-		}));
+			execDone();
+		}), _defineProperty(_createMockExec, "npm info .*", function npmInfo(execDone) {
+			execDone(null, "1.5.0");
+		}), _createMockExec));
 		mockTemp = (0, _helpersMockTempJs2["default"])(temporaryDirectoryPath);
 
 		s3ConstructorSpy = _sinon2["default"].spy();
@@ -99,13 +109,17 @@ xdescribe("AkiroBuilder(event, context)", function () {
 			S3: MockS3
 		};
 
+		localFilePath = temporaryDirectoryPath + "/local.zip";
+
 		context = {
-			localFilePath: temporaryDirectoryPath + "/local.zip",
+			localFilePath: localFilePath,
 			AWS: mockAWS,
 			exec: mockExec,
 			npmPath: mockNpmPath,
 			temp: mockTemp,
-			succeed: done,
+			succeed: function succeed(data) {
+				done(null, data);
+			},
 			fail: done
 		};
 
@@ -115,34 +129,40 @@ xdescribe("AkiroBuilder(event, context)", function () {
 
 	describe("(With context.localFilePath set)", function () {
 		it("should copy the .zip file to the designated local file path", function () {
-			_fsExtra2["default"].existsSync(context.localFilePath).should.be["true"];
-		});
-		it("should copy the .zip file to the designated local file path", function () {
-			var expectedFileData = _fsExtra2["default"].readFileSync(__dirname + "/../../../fixtures/async-1.0.0.zip");
-			var fileData = _fsExtra2["default"].readFileSync(context.localFilePath);
-			fileData.should.eql(expectedFileData);
+			/* eslint-disable new-cap */
+			var zipFixturePath = __dirname + "/../../../fixtures/async-1.0.0.zip";
+
+			var localFilePaths = [];
+			var expectedFilePaths = [];
+			_flowsync2["default"].series([function (done) {
+				_fsExtra2["default"].createReadStream(context.localFilePath).pipe(_unzip22["default"].Parse()).on("entry", function (entry) {
+					localFilePaths.push(entry.path);
+				}).on("close", done);
+			}, function (done) {
+				_fsExtra2["default"].createReadStream(zipFixturePath).pipe(_unzip22["default"].Parse()).on("entry", function (entry) {
+					expectedFilePaths.push(entry.path);
+				}).on("close", done);
+			}], function () {
+				localFilePaths.should.eql(expectedFilePaths);
+			});
 		});
 	});
 
 	describe("(WITHOUT context.localFilePath set)", function () {
 		beforeEach(function (done) {
+			_fsExtra2["default"].unlinkSync(localFilePath);
 			context.localFilePath = undefined;
 
-			context.succeed = done;
+			context.succeed = function (data) {
+				done(null, data);
+			};
 
 			akiroBuilder = new _libAkiroBuildersNodejsAkiroBuilderJs2["default"](event, context);
 			akiroBuilder.invoke(event, context);
 		});
 
-		it("should copy the .zip file to the designated local file path", function () {
-			var zipFileName = event["package"].name + "-" + _node_modulesAsyncPackageJson2["default"].version + ".zip";
-			var zipFileData = _fsExtra2["default"].readFileSync(__dirname + "/../../../fixtures/async-1.0.0.zip");
-			var putObjectParameters = {
-				Bucket: event.bucket,
-				Key: zipFileName,
-				Body: zipFileData
-			};
-			mockS3.putObject.calledWith(putObjectParameters);
+		it("should not copy the .zip file to a local file path", function () {
+			_fsExtra2["default"].existsSync(localFilePath).should.be["false"];
 		});
 	});
 });

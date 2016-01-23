@@ -1,10 +1,10 @@
 import AkiroBuilder from "../../../../lib/akiro/builders/nodejs/akiroBuilder.js";
 import sinon from "sinon";
 import temp from "temp";
-import fileSystem from "fs-extra";
-import packageJson from "../../../../../package.json";
+import asyncPackageJson from "../../../../../node_modules/async/package.json";
 import createMockExec from "../../../helpers/mockExec.js";
 import createMockTemp from "../../../helpers/mockTemp.js";
+import fileSystem from "fs-extra";
 
 temp.track();
 
@@ -18,11 +18,11 @@ describe("AkiroBuilder(event, context)", () => {
 
 			mockExec,
 			mockNpmPath,
-			mockTemp,
 			mockAWS,
 			mockS3,
+			mockTemp,
 
-			s3ConstructorSpy;
+			succeedData;
 
 	beforeEach((done) => {
 		temp.mkdir("akiroBuilder", (error, newTemporaryDirectoryPath) => {
@@ -36,13 +36,12 @@ describe("AkiroBuilder(event, context)", () => {
 	});
 
 	beforeEach(function (done) {
-
-
 		event = {
 			region: "us-east-1",
+			bucket: "akiro.test",
 			package: {
 				name: "async",
-				version: packageJson.dependencies.async
+				version: "1.0.0"
 			}
 		};
 
@@ -56,13 +55,10 @@ describe("AkiroBuilder(event, context)", () => {
 				execDone();
 			},
 			["npm info .*"]: execDone => {
-				execDone(null, "1.5.0");
+				execDone(null, event.package.version);
 			}
 		});
 		mockTemp = createMockTemp(temporaryDirectoryPath);
-
-		s3ConstructorSpy = sinon.spy();
-
 		mockS3 = {
 			putObject: sinon.spy((parameters, callback) => {
 				callback();
@@ -70,8 +66,7 @@ describe("AkiroBuilder(event, context)", () => {
 		};
 
 		class MockS3 {
-			constructor(config) {
-				s3ConstructorSpy(config);
+			constructor() {
 				return mockS3;
 			}
 		}
@@ -83,17 +78,19 @@ describe("AkiroBuilder(event, context)", () => {
 		context = {
 			AWS: mockAWS,
 			exec: mockExec,
-			npmPath: mockNpmPath,
 			temp: mockTemp,
-			succeed: (data) => { done(null, data); },
-			fail: done
+			npmPath: mockNpmPath,
+			succeed: (data) => {
+				succeedData = data;
+				done();
+			}
 		};
 
 		akiroBuilder = new AkiroBuilder(event, context);
 		akiroBuilder.invoke(event, context);
 	});
 
-	it("should create an empty package.json to satisfy npm", () => {
-		fileSystem.existsSync(`${temporaryDirectoryPath}/package.json`).should.be.true;
+	it("should return an object containing the file name", () => {
+		succeedData.fileName.should.eql("async-1.0.0.zip");
 	});
 });

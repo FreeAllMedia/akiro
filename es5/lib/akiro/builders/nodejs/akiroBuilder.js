@@ -122,6 +122,9 @@ var AkiroBuilder = (function () {
 					var packageZipReadBuffer = _this.fileSystem.readFileSync(packageZipFilePath);
 
 					var fileName = event["package"].name + "-" + version + ".zip";
+
+					parameters.fileName = fileName;
+
 					s3.putObject({
 						Bucket: event.bucket,
 						Key: fileName,
@@ -130,11 +133,21 @@ var AkiroBuilder = (function () {
 				} else {
 					done();
 				}
+			}, function (done) {
+				if (context.localFilePath) {
+					var temporaryDirectoryPath = parameters.temporaryDirectoryPath;
+					var packageZipFilePath = temporaryDirectoryPath + "/package.zip";
+					_fsExtra2["default"].copy(packageZipFilePath, context.localFilePath, done);
+				} else {
+					done();
+				}
 			}], function (error) {
 				if (error) {
 					context.fail(error);
 				} else {
-					context.succeed();
+					context.succeed({
+						fileName: parameters.fileName
+					});
 				}
 			});
 		}

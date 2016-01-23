@@ -18,13 +18,9 @@ var _temp = require("temp");
 
 var _temp2 = _interopRequireDefault(_temp);
 
-var _packageJson = require("../../../../../package.json");
+var _node_modulesAsyncPackageJson = require("../../../../../node_modules/async/package.json");
 
-var _packageJson2 = _interopRequireDefault(_packageJson);
-
-var _fsExtra = require("fs-extra");
-
-var _fsExtra2 = _interopRequireDefault(_fsExtra);
+var _node_modulesAsyncPackageJson2 = _interopRequireDefault(_node_modulesAsyncPackageJson);
 
 var _helpersMockExecJs = require("../../../helpers/mockExec.js");
 
@@ -34,17 +30,9 @@ var _helpersMockTempJs = require("../../../helpers/mockTemp.js");
 
 var _helpersMockTempJs2 = _interopRequireDefault(_helpersMockTempJs);
 
-var _glob = require("glob");
+var _fsExtra = require("fs-extra");
 
-var _glob2 = _interopRequireDefault(_glob);
-
-var _unzip2 = require("unzip2");
-
-var _unzip22 = _interopRequireDefault(_unzip2);
-
-var _arrayDifference = require("array-difference");
-
-var _arrayDifference2 = _interopRequireDefault(_arrayDifference);
+var _fsExtra2 = _interopRequireDefault(_fsExtra);
 
 _temp2["default"].track();
 
@@ -56,9 +44,10 @@ describe("AkiroBuilder(event, context)", function () {
 	    temporaryDirectoryPath = undefined,
 	    mockExec = undefined,
 	    mockNpmPath = undefined,
-	    mockTemp = undefined,
 	    mockAWS = undefined,
-	    mockS3 = undefined;
+	    mockS3 = undefined,
+	    mockTemp = undefined,
+	    succeedData = undefined;
 
 	beforeEach(function (done) {
 		_temp2["default"].mkdir("akiroBuilder", function (error, newTemporaryDirectoryPath) {
@@ -76,9 +65,10 @@ describe("AkiroBuilder(event, context)", function () {
 
 		event = {
 			region: "us-east-1",
+			bucket: "akiro.test",
 			"package": {
 				name: "async",
-				version: _packageJson2["default"].dependencies.async
+				version: "1.0.0"
 			}
 		};
 
@@ -91,10 +81,9 @@ describe("AkiroBuilder(event, context)", function () {
 			_fsExtra2["default"].copySync(__dirname + "/../../../fixtures/newPackage.json", temporaryDirectoryPath + "/package.json");
 			execDone();
 		}), _defineProperty(_createMockExec, "npm info .*", function npmInfo(execDone) {
-			execDone(null, "1.5.0");
+			execDone(null, event["package"].version);
 		}), _createMockExec));
 		mockTemp = (0, _helpersMockTempJs2["default"])(temporaryDirectoryPath);
-
 		mockS3 = {
 			putObject: _sinon2["default"].spy(function (parameters, callback) {
 				callback();
@@ -114,45 +103,19 @@ describe("AkiroBuilder(event, context)", function () {
 		context = {
 			AWS: mockAWS,
 			exec: mockExec,
-			npmPath: mockNpmPath,
 			temp: mockTemp,
+			npmPath: mockNpmPath,
 			succeed: function succeed(data) {
-				done(null, data);
-			},
-			fail: done
+				succeedData = data;
+				done();
+			}
 		};
 
 		akiroBuilder = new _libAkiroBuildersNodejsAkiroBuilderJs2["default"](event, context);
 		akiroBuilder.invoke(event, context);
 	});
 
-	it("should add all designated package code to a .zip file", function (done) {
-		/* eslint-disable new-cap */
-
-		var zipFilePath = temporaryDirectoryPath + "/package.zip";
-
-		var asyncFilePaths = _glob2["default"].sync(temporaryDirectoryPath + "/node_modules/async/**/*", { dot: true });
-		var npmFilePaths = _glob2["default"].sync(temporaryDirectoryPath + "/node_modules/npm/**/*", { dot: true });
-
-		asyncFilePaths = asyncFilePaths.filter(filterDirectories);
-		npmFilePaths = npmFilePaths.filter(filterDirectories);
-
-		function filterDirectories(filePath) {
-			return !_fsExtra2["default"].statSync(filePath).isDirectory();
-		}
-
-		var expectedFilePaths = asyncFilePaths.concat(npmFilePaths);
-		expectedFilePaths = expectedFilePaths.map(function (filePath) {
-			var relativePath = filePath.replace(temporaryDirectoryPath + "/node_modules/", "");
-			return relativePath;
-		});
-
-		var filePaths = [];
-		_fsExtra2["default"].createReadStream(zipFilePath).pipe(_unzip22["default"].Parse()).on("entry", function (entry) {
-			filePaths.push(entry.path);
-		}).on("close", function () {
-			(0, _arrayDifference2["default"])(expectedFilePaths, filePaths).should.eql([]);
-			done();
-		});
+	it("should return an object containing the file name", function () {
+		succeedData.fileName.should.eql("async-1.0.0.zip");
 	});
 });

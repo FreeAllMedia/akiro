@@ -67,6 +67,8 @@ describe("AkiroBuilder(event, context)", function () {
 	});
 
 	beforeEach(function (done) {
+		var _createMockExec;
+
 		event = {
 			region: "us-east-1",
 			"package": {
@@ -78,10 +80,14 @@ describe("AkiroBuilder(event, context)", function () {
 		nodeModulesDirectoryPath = __dirname + "/../../../../../node_modules";
 
 		mockNpmPath = nodeModulesDirectoryPath + "/npm/bin/npm-cli.js";
-		mockExec = (0, _helpersMockExecJs2["default"])(_defineProperty({}, "cd " + temporaryDirectoryPath + ";node " + mockNpmPath + " init -y", function (commandDone) {
+		mockExec = (0, _helpersMockExecJs2["default"])((_createMockExec = {}, _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + mockNpmPath + " install", function (execDone) {
+			return execDone();
+		}), _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + mockNpmPath + " init -y", function (execDone) {
 			_fsExtra2["default"].copySync(__dirname + "/../../../fixtures/newPackage.json", temporaryDirectoryPath + "/package.json");
-			commandDone();
-		}));
+			execDone();
+		}), _defineProperty(_createMockExec, "npm info .*", function npmInfo(execDone) {
+			execDone(null, "1.5.0");
+		}), _createMockExec));
 		mockTemp = (0, _helpersMockTempJs2["default"])(temporaryDirectoryPath);
 		mockFileSystem = {
 			writeFile: _sinon2["default"].spy(_fsExtra2["default"].writeFile),
@@ -113,7 +119,9 @@ describe("AkiroBuilder(event, context)", function () {
 			npmPath: mockNpmPath,
 			temp: mockTemp,
 			fileSystem: mockFileSystem,
-			succeed: done,
+			succeed: function succeed(data) {
+				done(null, data);
+			},
 			fail: done
 		};
 

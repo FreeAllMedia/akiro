@@ -51,9 +51,13 @@ describe("AkiroBuilder(event, context)", () => {
 
 		mockNpmPath = `${nodeModulesDirectoryPath}/npm/bin/npm-cli.js`;
 		mockExec = createMockExec({
-			[`cd ${temporaryDirectoryPath};node ${mockNpmPath} init -y`]:	(commandDone) => {
+			[`cd ${temporaryDirectoryPath};node ${mockNpmPath} install`]: execDone => execDone(),
+			[`cd ${temporaryDirectoryPath};node ${mockNpmPath} init -y`]: execDone => {
 				fileSystem.copySync(`${__dirname}/../../../fixtures/newPackage.json`, `${temporaryDirectoryPath}/package.json`);
-				commandDone();
+				execDone();
+			},
+			["npm info .*"]: execDone => {
+				execDone(null, "1.5.0");
 			}
 		});
 		mockTemp = createMockTemp(temporaryDirectoryPath);
@@ -79,7 +83,7 @@ describe("AkiroBuilder(event, context)", () => {
 			exec: mockExec,
 			npmPath: mockNpmPath,
 			temp: mockTemp,
-			succeed: done,
+			succeed: (data) => { done(null, data); },
 			fail: done
 		};
 

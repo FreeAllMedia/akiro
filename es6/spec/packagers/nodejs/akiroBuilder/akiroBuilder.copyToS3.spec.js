@@ -51,9 +51,13 @@ describe("AkiroBuilder(event, context)", () => {
 
 		mockNpmPath = `${nodeModulesDirectoryPath}/npm/bin/npm-cli.js`;
 		mockExec = createMockExec({
-			[`cd ${temporaryDirectoryPath};node ${mockNpmPath} init -y`]:	(commandDone) => {
+			[`cd ${temporaryDirectoryPath};node ${mockNpmPath} install`]: execDone => execDone(),
+			[`cd ${temporaryDirectoryPath};node ${mockNpmPath} init -y`]: execDone => {
 				fileSystem.copySync(`${__dirname}/../../../fixtures/newPackage.json`, `${temporaryDirectoryPath}/package.json`);
-				commandDone();
+				execDone();
+			},
+			["npm info .*"]: execDone => {
+				execDone(null, "1.5.0");
 			}
 		});
 		mockTemp = createMockTemp(temporaryDirectoryPath);
@@ -82,7 +86,7 @@ describe("AkiroBuilder(event, context)", () => {
 			exec: mockExec,
 			npmPath: mockNpmPath,
 			temp: mockTemp,
-			succeed: done,
+			succeed: (data) => { done(null, data); },
 			fail: done
 		};
 
@@ -114,11 +118,12 @@ describe("AkiroBuilder(event, context)", () => {
 			event.region = undefined;
 			event.bucket = undefined;
 
-			context.succeed = done;
+			context.succeed = (data) => { done(null, data); };
 
 			akiroBuilder = new AkiroBuilder(event, context);
 			akiroBuilder.invoke(event, context);
 		});
+
 		it("should NOT instantiate S3 with the designated region", () => {
 			s3ConstructorSpy.calledWith({
 				region: event.region

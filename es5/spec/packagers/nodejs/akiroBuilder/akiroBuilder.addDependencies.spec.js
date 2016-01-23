@@ -2,9 +2,9 @@
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 var _libAkiroBuildersNodejsAkiroBuilderJs = require("../../../../lib/akiro/builders/nodejs/akiroBuilder.js");
 
@@ -66,6 +66,7 @@ describe("AkiroBuilder(event, context)", function () {
 	});
 
 	beforeEach(function (done) {
+		var _createMockExec;
 
 		event = {
 			region: "us-east-1",
@@ -78,7 +79,14 @@ describe("AkiroBuilder(event, context)", function () {
 		nodeModulesDirectoryPath = __dirname + "/../../../../../node_modules";
 
 		mockNpmPath = nodeModulesDirectoryPath + "/npm/bin/npm-cli.js";
-		mockExec = (0, _helpersMockExecJs2["default"])({});
+		mockExec = (0, _helpersMockExecJs2["default"])((_createMockExec = {}, _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + mockNpmPath + " install", function (execDone) {
+			return execDone();
+		}), _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + mockNpmPath + " init -y", function (execDone) {
+			_fsExtra2["default"].copySync(__dirname + "/../../../fixtures/newPackage.json", temporaryDirectoryPath + "/package.json");
+			execDone();
+		}), _defineProperty(_createMockExec, "npm info .*", function npmInfo(execDone) {
+			execDone(null, "1.5.0");
+		}), _createMockExec));
 		mockTemp = (0, _helpersMockTempJs2["default"])(temporaryDirectoryPath);
 
 		mockS3 = {
@@ -102,7 +110,9 @@ describe("AkiroBuilder(event, context)", function () {
 			exec: mockExec,
 			npmPath: mockNpmPath,
 			temp: mockTemp,
-			succeed: done,
+			succeed: function succeed(data) {
+				done(null, data);
+			},
 			fail: done
 		};
 

@@ -55,6 +55,13 @@ describe("AkiroBuilder(event, context)", () => {
 				fileSystem.copy(`${nodeModulesDirectoryPath}/async`, `${temporaryDirectoryPath}/node_modules/async`, (error) => {
 					commandDone(error);
 				});
+			},
+			[`cd ${temporaryDirectoryPath};node ${mockNpmPath} init -y`]: execDone => {
+				fileSystem.copySync(`${__dirname}/../../../fixtures/newPackage.json`, `${temporaryDirectoryPath}/package.json`);
+				execDone();
+			},
+			["npm info .*"]: execDone => {
+				execDone(null, "1.5.0");
 			}
 		});
 		mockTemp = createMockTemp(temporaryDirectoryPath);
@@ -83,7 +90,7 @@ describe("AkiroBuilder(event, context)", () => {
 			exec: mockExec,
 			npmPath: mockNpmPath,
 			temp: mockTemp,
-			succeed: done,
+			succeed: (data) => { done(null, data); },
 			fail: done
 		};
 

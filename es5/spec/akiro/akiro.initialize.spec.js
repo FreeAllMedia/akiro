@@ -18,8 +18,6 @@ var _path = require("path");
 
 var _path2 = _interopRequireDefault(_path);
 
-var _packageJson = require("../../../package.json");
-
 var _temp = require("temp");
 
 var _temp2 = _interopRequireDefault(_temp);
@@ -35,6 +33,14 @@ var _fsExtra2 = _interopRequireDefault(_fsExtra);
 var _helpersMockExecJs = require("../helpers/mockExec.js");
 
 var _helpersMockExecJs2 = _interopRequireDefault(_helpersMockExecJs);
+
+var _glob = require("glob");
+
+var _glob2 = _interopRequireDefault(_glob);
+
+var _flowsync = require("flowsync");
+
+var _flowsync2 = _interopRequireDefault(_flowsync);
 
 _temp2["default"].track();
 
@@ -66,9 +72,7 @@ describe("akiro.initialize(iamRoleName, callback)", function () {
 	beforeEach(function (done) {
 		var _createMockExec;
 
-		this.timeout(300000);
-
-		lambdaName = "akiroBuilder";
+		lambdaName = "AkiroBuilder";
 		lambdaRole = "AkiroLambda";
 
 		var rootPath = _path2["default"].normalize(__dirname + "/../../../");
@@ -77,8 +81,18 @@ describe("akiro.initialize(iamRoleName, callback)", function () {
 		handlerFilePath = rootPath + "es6/lib/akiro/builders/nodejs/handler.js";
 		var npmPath = rootPath + "node_modules/npm/bin/npm-cli.js";
 
-		mockExec = (0, _helpersMockExecJs2["default"])((_createMockExec = {}, _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + npmPath + " install", function (execDone) {
-			return execDone();
+		var nodeModulesDirectoryPath = rootPath + "/node_modules";
+
+		mockExec = (0, _helpersMockExecJs2["default"])((_createMockExec = {}, _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + npmPath + " install", function (commandDone) {
+			_flowsync2["default"].series([function (copyDone) {
+				_fsExtra2["default"].copy(nodeModulesDirectoryPath + "/async", temporaryDirectoryPath + "/node_modules/async", function (error) {
+					copyDone(error);
+				});
+			}, function (copyDone) {
+				_fsExtra2["default"].copy(nodeModulesDirectoryPath + "/incognito", temporaryDirectoryPath + "/node_modules/incognito", function (error) {
+					copyDone(error);
+				});
+			}], commandDone);
 		}), _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + npmPath + " init -y", function (execDone) {
 			_fsExtra2["default"].copySync(__dirname + "/../fixtures/newPackage.json", temporaryDirectoryPath + "/package.json");
 			execDone();
@@ -89,8 +103,7 @@ describe("akiro.initialize(iamRoleName, callback)", function () {
 		mockTemp = {
 			mkdir: _sinon2["default"].spy(function (directoryName, mkdirCallback) {
 				mkdirCallback(null, temporaryDirectoryPath);
-			}),
-			track: function track() {}
+			})
 		};
 
 		config = {
@@ -130,18 +143,16 @@ describe("akiro.initialize(iamRoleName, callback)", function () {
 			mockConanLambda.role.firstCall.args[0].should.eql(lambdaRole);
 		});
 
-		xit("should use AkiroBuilder to build its own dependencies in a temp directory", function () {
-			var dependencyFileNames = _fsExtra2["default"].readdirSync(temporaryDirectoryPath);
+		it("should build its own dependencies in a temp directory", function () {
+			var dependencyFileNames = _glob2["default"].sync(temporaryDirectoryPath + "/**/*").map(function (dependencyPath) {
+				return dependencyPath.replace(temporaryDirectoryPath + "/", "");
+			});
 
-			dependencyFileNames.should.eql([1, 2, 3]);
+			dependencyFileNames.should.contain.members(["node_modules/async", "node_modules/incognito"]);
 		});
 
-		it("should include akiroBuilder and dependencies", function () {
-			var dependencyPaths = [[lambdaFilePath]];
-
-			for (var dependencyName in _packageJson.builderDependencies) {
-				dependencyPaths.push([temporaryDirectoryPath + "/node_modules/" + dependencyName + "/**/*"]);
-			}
+		it("should include akiroBuilder and dependencies in the temp directory", function () {
+			var dependencyPaths = [[lambdaFilePath], [temporaryDirectoryPath + "/node_modules/**/*"]];
 
 			mockConanLambda.dependencies().should.eql(dependencyPaths);
 		});

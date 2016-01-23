@@ -1,18 +1,20 @@
 import AkiroBuilder from "../../../../lib/akiro/builders/nodejs/akiroBuilder.js";
 import sinon from "sinon";
 import temp from "temp";
-import asyncPackageJson from "../../../../../node_modules/async/package.json";
 import createMockExec from "../../../helpers/mockExec.js";
 import createMockTemp from "../../../helpers/mockTemp.js";
 import fileSystem from "fs-extra";
+import unzip from "unzip2";
+import Async from "flowsync";
 
 temp.track();
 
-xdescribe("AkiroBuilder(event, context)", () => {
+describe("AkiroBuilder(event, context)", () => {
 	let event,
 			context,
 			akiroBuilder,
 
+			localFilePath,
 			nodeModulesDirectoryPath,
 			temporaryDirectoryPath,
 
@@ -36,11 +38,7 @@ xdescribe("AkiroBuilder(event, context)", () => {
 	});
 
 	beforeEach(function (done) {
-
-
 		event = {
-			region: "us-east-1",
-			bucket: "akiro.test",
 			package: {
 				name: "async",
 				version: "1.0.0"
@@ -51,9 +49,17 @@ xdescribe("AkiroBuilder(event, context)", () => {
 
 		mockNpmPath = `${nodeModulesDirectoryPath}/npm/bin/npm-cli.js`;
 		mockExec = createMockExec({
-			[`cd ${temporaryDirectoryPath};node ${mockNpmPath} init -y`]:	(commandDone) => {
+			[`cd ${temporaryDirectoryPath};node ${mockNpmPath} install`]: (commandDone) => {
+				fileSystem.copy(`${nodeModulesDirectoryPath}/async`, `${temporaryDirectoryPath}/node_modules/async`, (error) => {
+					commandDone(error);
+				});
+			},
+			[`cd ${temporaryDirectoryPath};node ${mockNpmPath} init -y`]: execDone => {
 				fileSystem.copySync(`${__dirname}/../../../fixtures/newPackage.json`, `${temporaryDirectoryPath}/package.json`);
-				commandDone();
+				execDone();
+			},
+			["npm info .*"]: execDone => {
+				execDone(null, "1.5.0");
 			}
 		});
 		mockTemp = createMockTemp(temporaryDirectoryPath);
@@ -77,13 +83,15 @@ xdescribe("AkiroBuilder(event, context)", () => {
 			S3: MockS3
 		};
 
+		localFilePath = `${temporaryDirectoryPath}/local.zip`;
+
 		context = {
-			localFilePath: `${temporaryDirectoryPath}/local.zip`,
+			localFilePath: localFilePath,
 			AWS: mockAWS,
 			exec: mockExec,
 			npmPath: mockNpmPath,
 			temp: mockTemp,
-			succeed: done,
+			succeed: (data) => { done(null, data); },
 			fail: done
 		};
 
@@ -93,34 +101,47 @@ xdescribe("AkiroBuilder(event, context)", () => {
 
 	describe("(With context.localFilePath set)", () => {
 		it("should copy the .zip file to the designated local file path", () => {
-			fileSystem.existsSync(context.localFilePath).should.be.true;
-		});
-		it("should copy the .zip file to the designated local file path", () => {
-			const expectedFileData = fileSystem.readFileSync(`${__dirname}/../../../fixtures/async-1.0.0.zip`);
-			const fileData = fileSystem.readFileSync(context.localFilePath);
-			fileData.should.eql(expectedFileData);
+			/* eslint-disable new-cap */
+			const zipFixturePath = `${__dirname}/../../../fixtures/async-1.0.0.zip`;
+
+			let localFilePaths = [];
+			let expectedFilePaths = [];
+			Async.series([
+				(done) => {
+					fileSystem.createReadStream(context.localFilePath)
+						.pipe(unzip.Parse())
+						.on("entry", (entry) => {
+							localFilePaths.push(entry.path);
+						})
+						.on("close", done);
+				},
+				(done) => {
+					fileSystem.createReadStream(zipFixturePath)
+						.pipe(unzip.Parse())
+						.on("entry", (entry) => {
+							expectedFilePaths.push(entry.path);
+						})
+						.on("close", done);
+				}
+			], () => {
+				localFilePaths.should.eql(expectedFilePaths);
+			});
 		});
 	});
 
 	describe("(WITHOUT context.localFilePath set)", () => {
 		beforeEach(done => {
+			fileSystem.unlinkSync(localFilePath);
 			context.localFilePath = undefined;
 
-			context.succeed = done;
+			context.succeed = (data) => { done(null, data); };
 
 			akiroBuilder = new AkiroBuilder(event, context);
 			akiroBuilder.invoke(event, context);
 		});
 
-		it("should copy the .zip file to the designated local file path", () => {
-			const zipFileName = `${event.package.name}-${asyncPackageJson.version}.zip`;
-			const zipFileData = fileSystem.readFileSync(`${__dirname}/../../../fixtures/async-1.0.0.zip`);
-			const putObjectParameters = {
-				Bucket: event.bucket,
-				Key: zipFileName,
-				Body: zipFileData
-			};
-			mockS3.putObject.calledWith(putObjectParameters);
+		it("should not copy the .zip file to a local file path", () => {
+			fileSystem.existsSync(localFilePath).should.be.false;
 		});
 	});
 });

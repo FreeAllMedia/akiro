@@ -93,6 +93,9 @@ export default class AkiroBuilder {
 					const packageZipReadBuffer = this.fileSystem.readFileSync(packageZipFilePath);
 
 					const fileName = `${event.package.name}-${version}.zip`;
+
+					parameters.fileName = fileName;
+
 					s3.putObject({
 						Bucket: event.bucket,
 						Key: fileName,
@@ -101,12 +104,23 @@ export default class AkiroBuilder {
 				} else {
 					done();
 				}
+			},
+			(done) => {
+				if (context.localFilePath) {
+					const temporaryDirectoryPath = parameters.temporaryDirectoryPath;
+					const packageZipFilePath = `${temporaryDirectoryPath}/package.zip`;
+					fileSystem.copy(packageZipFilePath, context.localFilePath, done);
+				} else {
+					done();
+				}
 			}
 		], (error) => {
 			if (error) {
 				context.fail(error);
 			} else {
-				context.succeed();
+				context.succeed({
+					fileName: parameters.fileName
+				});
 			}
 		});
 	}

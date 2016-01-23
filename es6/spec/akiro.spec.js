@@ -2,6 +2,8 @@ import Akiro from "../lib/akiro.js";
 import Conan from "conan";
 import temp from "temp";
 import { exec } from "child_process";
+import AWS from "aws-sdk";
+import Async from "flowsync";
 
 describe("Akiro(config)", () => {
 	let akiro,
@@ -76,6 +78,42 @@ describe("Akiro(config)", () => {
 		describe("(When akiro.config.temp is NOT set)", () => {
 			it("should set akiro.temp to the temp package", () => {
 				akiro.temp.should.eql(temp);
+			});
+		});
+	});
+
+	describe("akiro.AWS", () => {
+		describe("(When akiro.config.AWS is set)", () => {
+			it("should set akiro.AWS to akiro.config.AWS", () => {
+				const mockAWS = {};
+				config = {
+					AWS: mockAWS
+				};
+				akiro = new Akiro(config);
+				akiro.AWS.should.eql(mockAWS);
+			});
+		});
+		describe("(When akiro.config.AWS is NOT set)", () => {
+			it("should set akiro.AWS to the AWS package", () => {
+				akiro.AWS.should.eql(AWS);
+			});
+		});
+	});
+
+	describe("akiro.Async", () => {
+		describe("(When akiro.config.Async is set)", () => {
+			it("should set akiro.Async to akiro.config.Async", () => {
+				const mockAsync = {};
+				config = {
+					Async: mockAsync
+				};
+				akiro = new Akiro(config);
+				akiro.Async.should.eql(mockAsync);
+			});
+		});
+		describe("(When akiro.config.Async is NOT set)", () => {
+			it("should set akiro.Async to the Async package", () => {
+				akiro.Async.should.eql(Async);
 			});
 		});
 	});

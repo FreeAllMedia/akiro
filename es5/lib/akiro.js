@@ -36,11 +36,11 @@ var _flowsync = require("flowsync");
 
 var _flowsync2 = _interopRequireDefault(_flowsync);
 
-var _fsExtra = require("fs-extra");
-
-var _fsExtra2 = _interopRequireDefault(_fsExtra);
-
 var _child_process = require("child_process");
+
+var _awsSdk = require("aws-sdk");
+
+var _awsSdk2 = _interopRequireDefault(_awsSdk);
 
 var Akiro = (function () {
 	function Akiro() {
@@ -56,9 +56,12 @@ var Akiro = (function () {
 		this.conan = _.config.conan || new _conan2["default"]({ region: _.config.region });
 		this.conan.use(_conan.ConanAwsLambdaPlugin);
 
+		this.Async = _.config.Async || _flowsync2["default"];
+		this.AWS = _.config.AWS || _awsSdk2["default"];
 		this.temp = _.config.temp || _temp2["default"];
 		this.exec = _.config.exec || _child_process.exec;
-		// this.temp.track();
+
+		//this.temp.track();
 	}
 
 	_createClass(Akiro, [{
@@ -68,7 +71,7 @@ var Akiro = (function () {
 
 			var conan = this.conan;
 
-			var lambdaName = "akiroBuilder";
+			var lambdaName = "AkiroBuilder";
 			var lambdaRole = iamRoleName;
 			var lambdaFilePath = __dirname + "/akiro/builders/nodejs/akiroBuilder.js";
 			var handlerFilePath = __dirname + "/akiro/builders/nodejs/handler.js";
@@ -76,50 +79,87 @@ var Akiro = (function () {
 			var lambda = conan.lambda(lambdaName, handlerFilePath, lambdaRole);
 			lambda.dependencies(lambdaFilePath);
 
-			var createBuilderTask = function createBuilderTask(dependencyName, dependencyVersionRange) {
+			var createBuilderTask = function createBuilderTask(dependencyName, dependencyVersionRange, temporaryDirectoryPath) {
 				return function (done) {
-					_this.temp.mkdir("akiro.initialize." + dependencyName, function (error, temporaryDirectoryPath) {
-						var mockTemp = {
-							mkdir: function mkdir(directoryName, mkdirCallback) {
-								mkdirCallback(null, temporaryDirectoryPath);
-							}
-						};
+					var mockTemp = {
+						mkdir: function mkdir(directoryName, mkdirCallback) {
+							mkdirCallback(null, temporaryDirectoryPath);
+						}
+					};
 
-						var event = {
-							"package": {
-								name: dependencyName,
-								version: dependencyVersionRange
-							}
-						};
+					var event = {
+						"package": {
+							name: dependencyName,
+							version: dependencyVersionRange
+						}
+					};
 
-						var npmPath = _path2["default"].normalize(__dirname + "/../../node_modules/npm/bin/npm-cli.js");
+					var npmPath = _path2["default"].normalize(__dirname + "/../../node_modules/npm/bin/npm-cli.js");
 
-						var context = {
-							exec: _this.exec,
-							npmPath: npmPath,
-							temp: mockTemp,
-							succeed: function succeed() {
-								lambda.dependencies(temporaryDirectoryPath + "/node_modules/" + event["package"].name + "/**/*");
-								done();
-							}
-						};
-						var builder = new _akiroBuildersNodejsAkiroBuilderJs2["default"](event, context);
-						builder.invoke(event, context);
-					});
+					var context = {
+						exec: _this.exec,
+						npmPath: npmPath,
+						temp: mockTemp,
+						succeed: function succeed() {
+							done();
+						}
+					};
+					var builder = new _akiroBuildersNodejsAkiroBuilderJs2["default"](event, context);
+					builder.invoke(event, context);
 				};
 			};
 
-			_flowsync2["default"].series([function (done) {
-				var builderDependencyTasks = [];
+			this.temp.mkdir("akiro.initialize", function (error, temporaryDirectoryPath) {
+				_this.Async.series([function (done) {
+					var builderDependencyTasks = [];
 
-				for (var dependencyName in _packageJson.builderDependencies) {
-					var dependencyVersionRange = _packageJson.builderDependencies[dependencyName];
-					builderDependencyTasks.push(createBuilderTask(dependencyName, dependencyVersionRange));
+					for (var dependencyName in _packageJson.builderDependencies) {
+						var dependencyVersionRange = _packageJson.builderDependencies[dependencyName];
+						builderDependencyTasks.push(createBuilderTask(dependencyName, dependencyVersionRange, temporaryDirectoryPath));
+					}
+
+					_this.Async.series(builderDependencyTasks, done);
+				}], function () {
+					lambda.dependencies(temporaryDirectoryPath + "/node_modules/**/*");
+					conan.deploy(callback);
+				});
+			});
+		}
+	}, {
+		key: "package",
+		value: function _package(packageDetails, outputDirectoryPath, callback) {
+			var lambda = new this.AWS.Lambda({ region: this.config.region });
+			var s3 = new this.AWS.S3({ region: this.config.region });
+
+			var invokeLambdaTasks = [];
+
+			for (var packageName in packageDetails) {
+				var packageVersionRange = packageDetails[packageName];
+				invokeLambdaTasks.push(createInvokeLambdaTask(packageName, packageVersionRange, this));
+			}
+
+			function createInvokeLambdaTask(packageName, packageVersionRange, context) {
+				return function (done) {
+					lambda.invoke({
+						FunctionName: "AkiroBuilder", /* required */
+						Payload: JSON.stringify({
+							bucket: context.config.bucket,
+							region: context.config.region,
+							"package": {
+								name: packageName,
+								version: packageVersionRange
+							}
+						})
+					}, done);
+				};
+			}
+
+			this.Async.parallel(invokeLambdaTasks, function (error) {
+				if (error) {
+					callback(error);
+				} else {
+					callback();
 				}
-
-				_flowsync2["default"].series(builderDependencyTasks, done);
-			}], function () {
-				conan.deploy(callback);
 			});
 		}
 	}, {
