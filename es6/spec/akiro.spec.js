@@ -135,4 +135,22 @@ describe("Akiro(config)", () => {
 			});
 		});
 	});
+
+	describe("akiro.cacheDirectoryPath", () => {
+		describe("(When akiro.config.cacheDirectoryPath is set)", () => {
+			it("should set akiro.cacheDirectoryPath to akiro.config.cacheDirectoryPath", () => {
+				config = {
+					cacheDirectoryPath: "./.somethingElse/"
+				};
+				akiro = new Akiro(config);
+				akiro.cacheDirectoryPath.should.eql(config.cacheDirectoryPath);
+			});
+		});
+
+		describe("(When akiro.config.cacheDirectoryPath is NOT set)", () => {
+			it("should set akiro.cacheDirectoryPath to the cacheDirectoryPath package", () => {
+				akiro.cacheDirectoryPath.should.eql("./.akiro/cache");
+			});
+		});
+	});
 });

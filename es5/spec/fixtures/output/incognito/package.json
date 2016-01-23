@@ -1,0 +1,106 @@
+{
+  "_args": [
+    [
+      "incognito@0.1.4",
+      "/Users/dcrockwell/Dropbox/Code/akiro"
+    ]
+  ],
+  "_from": "incognito@0.1.4",
+  "_id": "incognito@0.1.4",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/incognito",
+  "_nodeVersion": "0.11.16",
+  "_npmUser": {
+    "email": "fam-operations@freeallmedia.com",
+    "name": "fam"
+  },
+  "_npmVersion": "2.3.0",
+  "_phantomChildren": {},
+  "_requested": {
+    "name": "incognito",
+    "raw": "incognito@0.1.4",
+    "rawSpec": "0.1.4",
+    "scope": null,
+    "spec": "0.1.4",
+    "type": "version"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/incognito/-/incognito-0.1.4.tgz",
+  "_shasum": "1e2ae92908475724cd04d36a66027112c0a46a11",
+  "_shrinkwrap": null,
+  "_spec": "incognito@0.1.4",
+  "_where": "/Users/dcrockwell/Dropbox/Code/akiro",
+  "author": {
+    "name": "Free All Media, LLC"
+  },
+  "bugs": {
+    "url": "https://github.com/FreeAllMedia/incognito/issues"
+  },
+  "contributors": [],
+  "dependencies": {
+    "babel-polyfill": "^6.3.14"
+  },
+  "description": "Private properties for your classes.",
+  "devDependencies": {
+    "babel": "^5.5.6",
+    "babel-eslint": "^3.1.20",
+    "chai": "^3.0.0",
+    "coveralls": "^2.11.2",
+    "eslint": "^0.24.0",
+    "gulp": "^3.9.0",
+    "gulp-babel": "^5.1.0",
+    "gulp-istanbul": "^0.10.0",
+    "gulp-mocha": "^2.1.1",
+    "gulp-util": "^3.0.6",
+    "karma": "^0.12.36",
+    "karma-browserify": "^4.2.1",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^0.2.0",
+    "karma-detect-browsers": "^2.0.0",
+    "karma-firefox-launcher": "^0.1.6",
+    "karma-ie-launcher": "^0.2.0",
+    "karma-mocha": "^0.1.10",
+    "karma-phantomjs-launcher": "^0.2.0",
+    "karma-safari-launcher": "^0.1.1",
+    "karma-sauce-launcher": "^0.2.11",
+    "mocha": "^2.2.5",
+    "superstack": "0.0.4"
+  },
+  "directories": {},
+  "dist": {
+    "shasum": "1e2ae92908475724cd04d36a66027112c0a46a11",
+    "tarball": "http://registry.npmjs.org/incognito/-/incognito-0.1.4.tgz"
+  },
+  "generatorVersion": "0.2.20",
+  "gitHead": "322d8d4f217b92f27539659a5c1f5561f1cc835d",
+  "homepage": "https://github.com/FreeAllMedia/incognito",
+  "keywords": [
+    "incognito"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "maintainers": [
+    {
+      "name": "nicosommi",
+      "email": "nicosommi@gmail.com"
+    },
+    {
+      "name": "fam",
+      "email": "fam-operations@freeallmedia.com"
+    }
+  ],
+  "name": "incognito",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FreeAllMedia/incognito.git"
+  },
+  "scripts": {
+    "test": "gulp test"
+  },
+  "version": "0.1.4"
+}

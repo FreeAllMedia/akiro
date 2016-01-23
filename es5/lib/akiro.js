@@ -42,6 +42,14 @@ var _awsSdk = require("aws-sdk");
 
 var _awsSdk2 = _interopRequireDefault(_awsSdk);
 
+var _fsExtra = require("fs-extra");
+
+var _fsExtra2 = _interopRequireDefault(_fsExtra);
+
+var _unzip2 = require("unzip2");
+
+var _unzip22 = _interopRequireDefault(_unzip2);
+
 var Akiro = (function () {
 	function Akiro() {
 		var config = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
@@ -60,6 +68,7 @@ var Akiro = (function () {
 		this.AWS = _.config.AWS || _awsSdk2["default"];
 		this.temp = _.config.temp || _temp2["default"];
 		this.exec = _.config.exec || _child_process.exec;
+		this.cacheDirectoryPath = _.config.cacheDirectoryPath || "./.akiro/cache";
 
 		//this.temp.track();
 	}
@@ -128,6 +137,8 @@ var Akiro = (function () {
 	}, {
 		key: "package",
 		value: function _package(packageDetails, outputDirectoryPath, callback) {
+			var _this2 = this;
+
 			var lambda = new this.AWS.Lambda({ region: this.config.region });
 			var s3 = new this.AWS.S3({ region: this.config.region });
 
@@ -154,11 +165,59 @@ var Akiro = (function () {
 				};
 			}
 
-			this.Async.parallel(invokeLambdaTasks, function (error) {
-				if (error) {
-					callback(error);
+			this.Async.parallel(invokeLambdaTasks, function (error, data) {
+
+				function createGetObjectTask(fileName, context) {
+					return function (done) {
+						var objectReadStream = s3.getObject({
+							Bucket: context.config.bucket,
+							Key: fileName
+						}).createReadStream();
+
+						var objectLocalFileName = context.cacheDirectoryPath + "/" + fileName;
+						var objectWriteStream = _fsExtra2["default"].createWriteStream(objectLocalFileName);
+
+						objectWriteStream.on("close", function () {
+							/* eslint-disable new-cap */
+
+							var writeFileTasks = [];
+
+							function createWriteFileTask(outputFileName, entry) {
+								return function (writeTaskDone) {
+									var fileWriteStream = _fsExtra2["default"].createWriteStream(outputFileName);
+									fileWriteStream.on("close", writeTaskDone);
+
+									entry.pipe(fileWriteStream);
+								};
+							}
+
+							console.log("HAAWWWHHHHHAAAAAAA?!!?!?!", objectLocalFileName);
+
+							_fsExtra2["default"].createReadStream(objectLocalFileName).pipe(_unzip22["default"].Parse()).on("entry", function (entry) {
+								var outputFileName = outputDirectoryPath + "/" + entry.path;
+								writeFileTasks.push(createWriteFileTask(outputFileName, entry));
+							}).on("close", function () {
+								_flowsync2["default"].parallel(writeFileTasks, done);
+							});
+						});
+
+						objectReadStream.pipe(objectWriteStream);
+					};
+				}
+
+				if (!error) {
+					(function () {
+						var getObjectTasks = [];
+
+						data.forEach(function (returnData) {
+							var fileName = returnData.fileName;
+							getObjectTasks.push(createGetObjectTask(fileName, _this2));
+						});
+
+						_this2.Async.parallel(getObjectTasks, callback);
+					})();
 				} else {
-					callback();
+					callback(error);
 				}
 			});
 		}

@@ -7,6 +7,8 @@ import AkiroBuilder from "./akiro/builders/nodejs/akiroBuilder.js";
 import Async from "flowsync";
 import { exec } from "child_process";
 import AWS from "aws-sdk";
+import fileSystem from "fs-extra";
+import unzip from "unzip2";
 
 export default class Akiro {
 	constructor(config={}) {
@@ -22,6 +24,7 @@ export default class Akiro {
 		this.AWS = _.config.AWS || AWS;
 		this.temp = _.config.temp || temp;
 		this.exec = _.config.exec || exec;
+		this.cacheDirectoryPath = _.config.cacheDirectoryPath || "./.akiro/cache";
 
 		//this.temp.track();
 	}
@@ -117,11 +120,60 @@ export default class Akiro {
 			};
 		}
 
-		this.Async.parallel(invokeLambdaTasks, error => {
-			if (error) {
-				callback(error);
+		this.Async.parallel(invokeLambdaTasks, (error, data) => {
+
+			function createGetObjectTask(fileName, context) {
+				return (done) => {
+					const objectReadStream = s3.getObject({
+						Bucket: context.config.bucket,
+						Key: fileName
+					}).createReadStream();
+
+					const objectLocalFileName = `${context.cacheDirectoryPath}/${fileName}`;
+					const objectWriteStream = fileSystem.createWriteStream(objectLocalFileName);
+
+					objectWriteStream
+						.on("close", () => {
+							/* eslint-disable new-cap */
+
+							let writeFileTasks = [];
+
+							function createWriteFileTask(outputFileName, entry) {
+								return writeTaskDone => {
+									const fileWriteStream = fileSystem.createWriteStream(outputFileName);
+									fileWriteStream.on("close", writeTaskDone);
+
+									entry.pipe(fileWriteStream);
+								};
+							}
+
+							fileSystem.createReadStream(objectLocalFileName)
+								.pipe(unzip.Parse())
+								.on("entry", entry => {
+									const outputFileName = `${outputDirectoryPath}/${entry.path}`;
+									writeFileTasks.push(createWriteFileTask(outputFileName, entry));
+								})
+								.on("close", () => {
+									Async.parallel(writeFileTasks, done);
+								});
+						});
+
+					objectReadStream
+						.pipe(objectWriteStream);
+				};
+			}
+
+			if (!error) {
+				let getObjectTasks = [];
+
+				data.forEach(returnData => {
+					const fileName = returnData.fileName;
+					getObjectTasks.push(createGetObjectTask(fileName, this));
+				});
+
+				this.Async.parallel(getObjectTasks, callback);
 			} else {
-				callback();
+				callback(error);
 			}
 		});
 	}

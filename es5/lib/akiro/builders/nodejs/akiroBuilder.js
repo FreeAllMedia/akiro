@@ -93,6 +93,7 @@ var AkiroBuilder = (function () {
 				var temporaryDirectoryPath = parameters.temporaryDirectoryPath;
 				var packagesZip = (0, _archiver2["default"])("zip", {});
 				var nodeModulesGlob = temporaryDirectoryPath + "/node_modules/**/*";
+
 				(0, _glob2["default"])(nodeModulesGlob, { dot: true }, function (error, filePaths) {
 					filePaths.forEach(function (filePath) {
 						var isDirectory = _this.fileSystem.statSync(filePath).isDirectory();

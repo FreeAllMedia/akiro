@@ -63,6 +63,7 @@ export default class AkiroBuilder {
 				const temporaryDirectoryPath = parameters.temporaryDirectoryPath;
 				const packagesZip = archiver("zip", {});
 				const nodeModulesGlob = `${temporaryDirectoryPath}/node_modules/**/*`;
+
 				glob(nodeModulesGlob, { dot: true }, (error, filePaths) => {
 					filePaths.forEach((filePath) => {
 						const isDirectory = this.fileSystem.statSync(filePath).isDirectory();

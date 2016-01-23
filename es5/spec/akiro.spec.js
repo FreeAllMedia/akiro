@@ -153,4 +153,22 @@ describe("Akiro(config)", function () {
 			});
 		});
 	});
+
+	describe("akiro.cacheDirectoryPath", function () {
+		describe("(When akiro.config.cacheDirectoryPath is set)", function () {
+			it("should set akiro.cacheDirectoryPath to akiro.config.cacheDirectoryPath", function () {
+				config = {
+					cacheDirectoryPath: "./.somethingElse/"
+				};
+				akiro = new _libAkiroJs2["default"](config);
+				akiro.cacheDirectoryPath.should.eql(config.cacheDirectoryPath);
+			});
+		});
+
+		describe("(When akiro.config.cacheDirectoryPath is NOT set)", function () {
+			it("should set akiro.cacheDirectoryPath to the cacheDirectoryPath package", function () {
+				akiro.cacheDirectoryPath.should.eql("./.akiro/cache");
+			});
+		});
+	});
 });

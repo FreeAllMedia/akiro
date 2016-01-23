@@ -22,22 +22,25 @@
   },
   "homepage": "https://github.com/FreeAllMedia/akiro",
   "builderDependencies": {
-		"archiver": "^0.21.0",
-		"aws-sdk": "^2.2.28",
-		"flowsync": "^0.1.12",
-		"fs-extra": "^0.26.4",
-		"glob": "^6.0.4",
-		"incognito": "^0.1.4",
-		"temp": "^0.8.3",
-		"unzip2": "^0.2.5"
-  },
-  "dependencies": {
     "archiver": "^0.21.0",
     "aws-sdk": "^2.2.28",
     "flowsync": "^0.1.12",
     "fs-extra": "^0.26.4",
     "glob": "^6.0.4",
     "incognito": "^0.1.4",
+    "temp": "^0.8.3",
+    "unzip2": "^0.2.5",
+		"npm": "^2.14.15"
+  },
+  "dependencies": {
+    "archiver": "^0.21.0",
+    "aws-sdk": "^2.2.28",
+    "conan": "0.0.14",
+    "flowsync": "^0.1.12",
+    "fs-extra": "^0.26.4",
+    "glob": "^6.0.4",
+    "incognito": "^0.1.4",
+    "npm": "^2.14.15",
     "temp": "^0.8.3",
     "unzip2": "^0.2.5"
   },
@@ -56,7 +59,6 @@
     "gulp-mocha": "^2.1.3",
     "gulp-util": "^3.0.6",
     "mocha": "^2.2.5",
-    "npm": "^3.5.3",
     "rewire": "^2.5.1",
     "sinon": "^1.17.2",
     "superstack": "0.0.4"
