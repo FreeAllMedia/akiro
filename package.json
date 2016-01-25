@@ -30,14 +30,16 @@
     "incognito": "^0.1.4",
     "temp": "^0.8.3",
     "unzip2": "^0.2.5",
-		"npm": "^2.14.15"
+    "npm": "^2.14.15"
   },
   "dependencies": {
     "archiver": "^0.21.0",
     "aws-sdk": "^2.2.28",
+    "bauer-zip": "^1.0.2",
     "conan": "0.0.14",
     "flowsync": "^0.1.12",
     "fs-extra": "^0.26.4",
+    "fstream": "^1.0.8",
     "glob": "^6.0.4",
     "incognito": "^0.1.4",
     "npm": "^2.14.15",

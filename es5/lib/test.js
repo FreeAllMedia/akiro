@@ -1,33 +1,32 @@
-/* eslint-disable no-console */
-
 "use strict";
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-var _packageJson = require("../../package.json");
+var cat = Symbol();
 
-var _packageJson2 = _interopRequireDefault(_packageJson);
+var something = _defineProperty({}, cat, "foo");
 
-var _akiroJs = require("./akiro.js");
+console.log(something["cat"]);
+console.log(something[cat]);
 
-var _akiroJs2 = _interopRequireDefault(_akiroJs);
-
-var akiro = new _akiroJs2["default"]();
-
-var iamRoleName = "AWSLambda";
-
-akiro.initialize(iamRoleName, function (error) {
-	if (error) {
-		throw error;
-	}
-	console.log("Akiro deployed.");
-
-	var outputDirectory = __dirname + "/../../testOutput/";
-
-	akiro["package"](_packageJson2["default"].dependencies, outputDirectory, function (packageError) {
-		if (packageError) {
-			throw packageError;
-		}
-		console.log("Akiro deployed.");
-	});
-});
+// /* eslint-disable no-console */
+//
+// import packageJson from "../../package.json";
+//
+// import Akiro from "./akiro.js";
+//
+// const akiro = new Akiro();
+//
+// const iamRoleName = "AWSLambda";
+//
+// akiro.initialize(iamRoleName, (error) => {
+// 	if (error) { throw error; }
+// 	console.log("Akiro deployed.");
+//
+// 	const outputDirectory = `${__dirname}/../../testOutput/`;
+//
+// 	akiro.package(packageJson.dependencies, outputDirectory, (packageError) => {
+// 		if (packageError) { throw packageError; }
+// 		console.log("Akiro deployed.");
+// 	});
+// });

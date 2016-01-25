@@ -46,9 +46,20 @@ var _fsExtra = require("fs-extra");
 
 var _fsExtra2 = _interopRequireDefault(_fsExtra);
 
-var _unzip2 = require("unzip2");
+var _bauerZip = require("bauer-zip");
 
-var _unzip22 = _interopRequireDefault(_unzip2);
+var _bauerZip2 = _interopRequireDefault(_bauerZip);
+
+var _fstream = require("fstream");
+
+var _fstream2 = _interopRequireDefault(_fstream);
+
+var invokeBuilderLambdas = Symbol();
+var createInvokeLambdaTask = Symbol();
+var downloadObjectsFromS3 = Symbol();
+var createGetObjectTask = Symbol();
+var unzipObjectFiles = Symbol();
+var createWriteFileTask = Symbol();
 
 var Akiro = (function () {
 	function Akiro() {
@@ -139,87 +150,86 @@ var Akiro = (function () {
 		value: function _package(packageDetails, outputDirectoryPath, callback) {
 			var _this2 = this;
 
-			var lambda = new this.AWS.Lambda({ region: this.config.region });
-			var s3 = new this.AWS.S3({ region: this.config.region });
+			var _ = (0, _incognito2["default"])(this);
 
+			_.lambda = new this.AWS.Lambda({ region: this.config.region });
+			_.s3 = new this.AWS.S3({ region: this.config.region });
+
+			this[invokeBuilderLambdas](packageDetails, function (error, data) {
+				_this2[downloadObjectsFromS3](error, data, outputDirectoryPath, callback);
+			});
+		}
+	}, {
+		key: invokeBuilderLambdas,
+		value: function value(packageDetails, callback) {
 			var invokeLambdaTasks = [];
-
 			for (var packageName in packageDetails) {
 				var packageVersionRange = packageDetails[packageName];
-				invokeLambdaTasks.push(createInvokeLambdaTask(packageName, packageVersionRange, this));
+				invokeLambdaTasks.push(this[createInvokeLambdaTask](packageName, packageVersionRange, this));
 			}
+			this.Async.parallel(invokeLambdaTasks, callback);
+		}
+	}, {
+		key: createInvokeLambdaTask,
+		value: function value(packageName, packageVersionRange, context) {
+			var _ = (0, _incognito2["default"])(this);
+			return function (done) {
+				_.lambda.invoke({
+					FunctionName: "AkiroBuilder", /* required */
+					Payload: JSON.stringify({
+						bucket: context.config.bucket,
+						region: context.config.region,
+						"package": {
+							name: packageName,
+							version: packageVersionRange
+						}
+					})
+				}, done);
+			};
+		}
+	}, {
+		key: downloadObjectsFromS3,
+		value: function value(error, data, outputDirectoryPath, callback) {
+			var _this3 = this;
 
-			function createInvokeLambdaTask(packageName, packageVersionRange, context) {
-				return function (done) {
-					lambda.invoke({
-						FunctionName: "AkiroBuilder", /* required */
-						Payload: JSON.stringify({
-							bucket: context.config.bucket,
-							region: context.config.region,
-							"package": {
-								name: packageName,
-								version: packageVersionRange
-							}
-						})
-					}, done);
-				};
+			if (!error) {
+				(function () {
+					_fsExtra2["default"].mkdirpSync(_this3.cacheDirectoryPath);
+
+					var getObjectTasks = [];
+
+					data.forEach(function (returnData) {
+						var fileName = returnData.fileName;
+						getObjectTasks.push(_this3[createGetObjectTask](fileName, outputDirectoryPath, _this3));
+					});
+
+					_this3.Async.parallel(getObjectTasks, callback);
+				})();
+			} else {
+				callback(error);
 			}
+		}
+	}, {
+		key: createGetObjectTask,
+		value: function value(fileName, outputDirectoryPath, context) {
+			var _ = (0, _incognito2["default"])(this);
 
-			this.Async.parallel(invokeLambdaTasks, function (error, data) {
+			return function (done) {
+				var objectReadStream = _.s3.getObject({
+					Bucket: context.config.bucket,
+					Key: fileName
+				}).createReadStream();
 
-				function createGetObjectTask(fileName, context) {
-					return function (done) {
-						var objectReadStream = s3.getObject({
-							Bucket: context.config.bucket,
-							Key: fileName
-						}).createReadStream();
+				var objectLocalFileName = context.cacheDirectoryPath + "/" + fileName;
+				var objectWriteStream = _fsExtra2["default"].createWriteStream(objectLocalFileName);
 
-						var objectLocalFileName = context.cacheDirectoryPath + "/" + fileName;
-						var objectWriteStream = _fsExtra2["default"].createWriteStream(objectLocalFileName);
+				objectWriteStream.on("close", function () {
+					/* eslint-disable new-cap */
+					_bauerZip2["default"].unzip(objectLocalFileName, outputDirectoryPath, done);
+				});
 
-						objectWriteStream.on("close", function () {
-							/* eslint-disable new-cap */
-
-							var writeFileTasks = [];
-
-							function createWriteFileTask(outputFileName, entry) {
-								return function (writeTaskDone) {
-									var fileWriteStream = _fsExtra2["default"].createWriteStream(outputFileName);
-									fileWriteStream.on("close", writeTaskDone);
-
-									entry.pipe(fileWriteStream);
-								};
-							}
-
-							console.log("HAAWWWHHHHHAAAAAAA?!!?!?!", objectLocalFileName);
-
-							_fsExtra2["default"].createReadStream(objectLocalFileName).pipe(_unzip22["default"].Parse()).on("entry", function (entry) {
-								var outputFileName = outputDirectoryPath + "/" + entry.path;
-								writeFileTasks.push(createWriteFileTask(outputFileName, entry));
-							}).on("close", function () {
-								_flowsync2["default"].parallel(writeFileTasks, done);
-							});
-						});
-
-						objectReadStream.pipe(objectWriteStream);
-					};
-				}
-
-				if (!error) {
-					(function () {
-						var getObjectTasks = [];
-
-						data.forEach(function (returnData) {
-							var fileName = returnData.fileName;
-							getObjectTasks.push(createGetObjectTask(fileName, _this2));
-						});
-
-						_this2.Async.parallel(getObjectTasks, callback);
-					})();
-				} else {
-					callback(error);
-				}
-			});
+				objectReadStream.pipe(objectWriteStream);
+			};
 		}
 	}, {
 		key: "config",

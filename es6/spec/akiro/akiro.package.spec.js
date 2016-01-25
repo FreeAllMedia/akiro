@@ -27,13 +27,15 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", () => {
 			s3ConstructorSpy;
 
 	beforeEach(function (done) {
+		this.timeout(300000);
+
 		packageDetails = {
 			"async": "1.0.0",
 			"incognito": "0.1.4"
 		};
 
-		outputDirectoryPath = temp.mkdirSync("akiro.output");
-		cacheDirectoryPath = temp.mkdirSync("akiro.cache");
+		outputDirectoryPath = path.normalize(`${__dirname}/../../../temp`); //temp.mkdirSync("akiro.output");
+		cacheDirectoryPath = `${temp.mkdirSync("akiro.cache")}/cache`;
 
 		lambdaConstructorSpy = sinon.spy();
 		s3ConstructorSpy = sinon.spy();
@@ -122,6 +124,10 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", () => {
 		}).should.be.true;
 	});
 
+	it("should create the cache directory if it doesn't already exist", () => {
+		fileSystem.existsSync(cacheDirectoryPath).should.be.true;
+	});
+	
 	describe("(Lambda Invoking)", () => {
 		it("should invoke the Akiro Builder lambda functions in parallel", () => {
 			mockAsync.parallel.called.should.be.true;
@@ -224,13 +230,8 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", () => {
 			});
 		});
 
-
-		it("should unzip each package file in parallel", () => {
-			mockAsync.parallel.calledThrice.should.be.true;
-		});
-
 		it("should copy the unzipped package files to the outputDirectoryPath provided", () => {
-			const outputDirectoryFilePaths = glob.sync(outputDirectoryPath).map((filePath) => {
+			const outputDirectoryFilePaths = glob.sync(`${outputDirectoryPath}/**/*`, { dot: true }).map((filePath) => {
 				return filePath.replace(outputDirectoryPath, "");
 			});
 

@@ -8,7 +8,15 @@ import Async from "flowsync";
 import { exec } from "child_process";
 import AWS from "aws-sdk";
 import fileSystem from "fs-extra";
-import unzip from "unzip2";
+import unzip from "bauer-zip";
+import fstream from "fstream";
+
+const invokeBuilderLambdas = Symbol();
+const createInvokeLambdaTask = Symbol();
+const downloadObjectsFromS3 = Symbol();
+const createGetObjectTask = Symbol();
+const unzipObjectFiles = Symbol();
+const createWriteFileTask = Symbol();
 
 export default class Akiro {
 	constructor(config={}) {
@@ -94,87 +102,79 @@ export default class Akiro {
 	}
 
 	package(packageDetails, outputDirectoryPath, callback) {
-		const lambda = new this.AWS.Lambda({ region: this.config.region });
-		const s3 = new this.AWS.S3({ region: this.config.region });
+		const _ = privateData(this);
 
+		_.lambda = new this.AWS.Lambda({ region: this.config.region });
+		_.s3 = new this.AWS.S3({ region: this.config.region });
+
+		this[invokeBuilderLambdas](packageDetails, (error, data) => {
+			this[downloadObjectsFromS3](error, data, outputDirectoryPath, callback);
+		});
+	}
+
+	[invokeBuilderLambdas](packageDetails, callback) {
 		let invokeLambdaTasks = [];
-
 		for (let packageName in packageDetails) {
 			const packageVersionRange = packageDetails[packageName];
-			invokeLambdaTasks.push(createInvokeLambdaTask(packageName, packageVersionRange, this));
+			invokeLambdaTasks.push(this[createInvokeLambdaTask](packageName, packageVersionRange, this));
 		}
+		this.Async.parallel(invokeLambdaTasks, callback);
+	}
 
-		function createInvokeLambdaTask(packageName, packageVersionRange, context) {
-			return (done) => {
-				lambda.invoke({
-					FunctionName: "AkiroBuilder", /* required */
-					Payload: JSON.stringify({
-						bucket: context.config.bucket,
-						region: context.config.region,
-						package: {
-							name: packageName,
-							version: packageVersionRange
-						}
-					})
-				}, done);
-			};
+	[createInvokeLambdaTask](packageName, packageVersionRange, context) {
+		const _ = privateData(this);
+		return (done) => {
+			_.lambda.invoke({
+				FunctionName: "AkiroBuilder", /* required */
+				Payload: JSON.stringify({
+					bucket: context.config.bucket,
+					region: context.config.region,
+					package: {
+						name: packageName,
+						version: packageVersionRange
+					}
+				})
+			}, done);
+		};
+	}
+
+	[downloadObjectsFromS3](error, data, outputDirectoryPath, callback) {
+		if (!error) {
+			fileSystem.mkdirpSync(this.cacheDirectoryPath);
+
+			let getObjectTasks = [];
+
+			data.forEach(returnData => {
+				const fileName = returnData.fileName;
+				getObjectTasks.push(this[createGetObjectTask](fileName, outputDirectoryPath, this));
+			});
+
+			this.Async.parallel(getObjectTasks, callback);
+		} else {
+			callback(error);
 		}
+	}
 
-		this.Async.parallel(invokeLambdaTasks, (error, data) => {
+	[createGetObjectTask](fileName, outputDirectoryPath, context) {
+		const _ = privateData(this);
 
-			function createGetObjectTask(fileName, context) {
-				return (done) => {
-					const objectReadStream = s3.getObject({
-						Bucket: context.config.bucket,
-						Key: fileName
-					}).createReadStream();
+		return done => {
+			const objectReadStream = _.s3.getObject({
+				Bucket: context.config.bucket,
+				Key: fileName
+			}).createReadStream();
 
-					const objectLocalFileName = `${context.cacheDirectoryPath}/${fileName}`;
-					const objectWriteStream = fileSystem.createWriteStream(objectLocalFileName);
+			const objectLocalFileName = `${context.cacheDirectoryPath}/${fileName}`;
+			const objectWriteStream = fileSystem.createWriteStream(objectLocalFileName);
 
-					objectWriteStream
-						.on("close", () => {
-							/* eslint-disable new-cap */
-
-							let writeFileTasks = [];
-
-							function createWriteFileTask(outputFileName, entry) {
-								return writeTaskDone => {
-									const fileWriteStream = fileSystem.createWriteStream(outputFileName);
-									fileWriteStream.on("close", writeTaskDone);
-
-									entry.pipe(fileWriteStream);
-								};
-							}
-
-							fileSystem.createReadStream(objectLocalFileName)
-								.pipe(unzip.Parse())
-								.on("entry", entry => {
-									const outputFileName = `${outputDirectoryPath}/${entry.path}`;
-									writeFileTasks.push(createWriteFileTask(outputFileName, entry));
-								})
-								.on("close", () => {
-									Async.parallel(writeFileTasks, done);
-								});
-						});
-
-					objectReadStream
-						.pipe(objectWriteStream);
-				};
-			}
-
-			if (!error) {
-				let getObjectTasks = [];
-
-				data.forEach(returnData => {
-					const fileName = returnData.fileName;
-					getObjectTasks.push(createGetObjectTask(fileName, this));
+			objectWriteStream
+				.on("close", () => {
+					/* eslint-disable new-cap */
+					unzip.unzip(objectLocalFileName, outputDirectoryPath, done);
 				});
 
-				this.Async.parallel(getObjectTasks, callback);
-			} else {
-				callback(error);
-			}
-		});
+			objectReadStream
+				.pipe(objectWriteStream);
+		};
 	}
 }
