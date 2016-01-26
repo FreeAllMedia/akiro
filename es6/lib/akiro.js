@@ -5,18 +5,16 @@ import path from "path";
 import temp from "temp";
 import AkiroBuilder from "./akiro/builders/nodejs/akiroBuilder.js";
 import Async from "flowsync";
-import { exec } from "child_process";
+import { exec, execSync } from "child_process";
 import AWS from "aws-sdk";
 import fileSystem from "fs-extra";
 import unzip from "bauer-zip";
-import fstream from "fstream";
 
 const invokeBuilderLambdas = Symbol();
 const createInvokeLambdaTask = Symbol();
 const downloadObjectsFromS3 = Symbol();
 const createGetObjectTask = Symbol();
-const unzipObjectFiles = Symbol();
-const createWriteFileTask = Symbol();
+const unzipLocalFile = Symbol();
 
 export default class Akiro {
 	constructor(config={}) {
@@ -32,6 +30,7 @@ export default class Akiro {
 		this.AWS = _.config.AWS || AWS;
 		this.temp = _.config.temp || temp;
 		this.exec = _.config.exec || exec;
+		this.execSync = _.config.execSync || execSync;
 		this.cacheDirectoryPath = _.config.cacheDirectoryPath || "./.akiro/cache";
 
 		//this.temp.track();
@@ -103,12 +102,36 @@ export default class Akiro {
 
 	package(packageDetails, outputDirectoryPath, callback) {
 		const _ = privateData(this);
-
 		_.lambda = new this.AWS.Lambda({ region: this.config.region });
 		_.s3 = new this.AWS.S3({ region: this.config.region });
 
-		this[invokeBuilderLambdas](packageDetails, (error, data) => {
-			this[downloadObjectsFromS3](error, data, outputDirectoryPath, callback);
+		Async.mapParallel(Object.keys(packageDetails), (packageName, done) => {
+			const packageVersionRange = packageDetails[packageName];
+
+			const command = `npm info ${packageName}@${packageVersionRange} version | tail -n 1`;
+
+			this.exec(command, (error, stdout) => {
+				let packageLatestVersion;
+				if (stdout.indexOf("@") === -1) {
+					packageLatestVersion = stdout.replace("\n", "");
+				} else {
+					packageLatestVersion = stdout.match(/[a-zA-Z0-9]*@(.*) /)[1];
+				}
+
+				const cachedFilePath = `${this.cacheDirectoryPath}/${packageName}-${packageLatestVersion}.zip`;
+
+				if (fileSystem.existsSync(cachedFilePath)) {
+					delete packageDetails[packageName];
+					this[unzipLocalFile](cachedFilePath, outputDirectoryPath, done);
+				} else {
+					packageDetails[packageName] = packageLatestVersion;
+					done();
+				}
+			});
+		}, () => {
+			this[invokeBuilderLambdas](packageDetails, (invokeBuilderLambdasError, data) => {
+				this[downloadObjectsFromS3](invokeBuilderLambdasError, data, outputDirectoryPath, callback);
+			});
 		});
 	}
 
@@ -122,8 +145,8 @@ export default class Akiro {
 	}
 
 	[createInvokeLambdaTask](packageName, packageVersionRange, context) {
-		const _ = privateData(this);
-		return (done) => {
+		return done => {
+			const _ = privateData(context);
 			_.lambda.invoke({
 				FunctionName: "AkiroBuilder", /* required */
 				Payload: JSON.stringify({
@@ -169,12 +192,15 @@ export default class Akiro {
 
 			objectWriteStream
 				.on("close", () => {
-					/* eslint-disable new-cap */
-					unzip.unzip(objectLocalFileName, outputDirectoryPath, done);
+					this[unzipLocalFile](objectLocalFileName, outputDirectoryPath, done);
 				});
 
 			objectReadStream
 				.pipe(objectWriteStream);
 		};
+	}
+
+	[unzipLocalFile](localFileName, outputDirectoryPath, callback) {
+		unzip.unzip(localFileName, outputDirectoryPath, callback);
 	}
 }

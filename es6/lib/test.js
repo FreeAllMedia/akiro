@@ -1,16 +1,18 @@
-const cat = Symbol();
+const oldWrite = process.stdout.write;
+process.stdout.write = function () {};
 
-const something = {
-	[cat]: "foo"
-};
-
-console.log(something["cat"]);
-console.log(something[cat]);
-
-
-
-
-
+var npm = require("npm");
+npm.load({ loglevel: "silent"}, function(err) {
+  // install module ffi
+  npm.commands.info(["async@1.1.x"], function(er, data) {
+		process.stdout.write = oldWrite;
+		if (er) { throw er; }
+		const versionNumbers = Object.keys(data);
+		const latestVersion = versionNumbers[versionNumbers.length-1];
+		console.log(latestVersion);
+    // log errors or data
+  });
+});
 
 
 

@@ -50,16 +50,11 @@ var _bauerZip = require("bauer-zip");
 
 var _bauerZip2 = _interopRequireDefault(_bauerZip);
 
-var _fstream = require("fstream");
-
-var _fstream2 = _interopRequireDefault(_fstream);
-
 var invokeBuilderLambdas = Symbol();
 var createInvokeLambdaTask = Symbol();
 var downloadObjectsFromS3 = Symbol();
 var createGetObjectTask = Symbol();
-var unzipObjectFiles = Symbol();
-var createWriteFileTask = Symbol();
+var unzipLocalFile = Symbol();
 
 var Akiro = (function () {
 	function Akiro() {
@@ -79,6 +74,7 @@ var Akiro = (function () {
 		this.AWS = _.config.AWS || _awsSdk2["default"];
 		this.temp = _.config.temp || _temp2["default"];
 		this.exec = _.config.exec || _child_process.exec;
+		this.execSync = _.config.execSync || _child_process.execSync;
 		this.cacheDirectoryPath = _.config.cacheDirectoryPath || "./.akiro/cache";
 
 		//this.temp.track();
@@ -151,12 +147,36 @@ var Akiro = (function () {
 			var _this2 = this;
 
 			var _ = (0, _incognito2["default"])(this);
-
 			_.lambda = new this.AWS.Lambda({ region: this.config.region });
 			_.s3 = new this.AWS.S3({ region: this.config.region });
 
-			this[invokeBuilderLambdas](packageDetails, function (error, data) {
-				_this2[downloadObjectsFromS3](error, data, outputDirectoryPath, callback);
+			_flowsync2["default"].mapParallel(Object.keys(packageDetails), function (packageName, done) {
+				var packageVersionRange = packageDetails[packageName];
+
+				var command = "npm info " + packageName + "@" + packageVersionRange + " version | tail -n 1";
+
+				_this2.exec(command, function (error, stdout) {
+					var packageLatestVersion = undefined;
+					if (stdout.indexOf("@") === -1) {
+						packageLatestVersion = stdout.replace("\n", "");
+					} else {
+						packageLatestVersion = stdout.match(/[a-zA-Z0-9]*@(.*) /)[1];
+					}
+
+					var cachedFilePath = _this2.cacheDirectoryPath + "/" + packageName + "-" + packageLatestVersion + ".zip";
+
+					if (_fsExtra2["default"].existsSync(cachedFilePath)) {
+						delete packageDetails[packageName];
+						_this2[unzipLocalFile](cachedFilePath, outputDirectoryPath, done);
+					} else {
+						packageDetails[packageName] = packageLatestVersion;
+						done();
+					}
+				});
+			}, function () {
+				_this2[invokeBuilderLambdas](packageDetails, function (invokeBuilderLambdasError, data) {
+					_this2[downloadObjectsFromS3](invokeBuilderLambdasError, data, outputDirectoryPath, callback);
+				});
 			});
 		}
 	}, {
@@ -172,8 +192,8 @@ var Akiro = (function () {
 	}, {
 		key: createInvokeLambdaTask,
 		value: function value(packageName, packageVersionRange, context) {
-			var _ = (0, _incognito2["default"])(this);
 			return function (done) {
+				var _ = (0, _incognito2["default"])(context);
 				_.lambda.invoke({
 					FunctionName: "AkiroBuilder", /* required */
 					Payload: JSON.stringify({
@@ -212,6 +232,8 @@ var Akiro = (function () {
 	}, {
 		key: createGetObjectTask,
 		value: function value(fileName, outputDirectoryPath, context) {
+			var _this4 = this;
+
 			var _ = (0, _incognito2["default"])(this);
 
 			return function (done) {
@@ -224,12 +246,16 @@ var Akiro = (function () {
 				var objectWriteStream = _fsExtra2["default"].createWriteStream(objectLocalFileName);
 
 				objectWriteStream.on("close", function () {
-					/* eslint-disable new-cap */
-					_bauerZip2["default"].unzip(objectLocalFileName, outputDirectoryPath, done);
+					_this4[unzipLocalFile](objectLocalFileName, outputDirectoryPath, done);
 				});
 
 				objectReadStream.pipe(objectWriteStream);
 			};
+		}
+	}, {
+		key: unzipLocalFile,
+		value: function value(localFileName, outputDirectoryPath, callback) {
+			_bauerZip2["default"].unzip(localFileName, outputDirectoryPath, callback);
 		}
 	}, {
 		key: "config",

@@ -1,11 +1,10 @@
 import AkiroBuilder from "../../../../lib/akiro/builders/nodejs/akiroBuilder.js";
 import sinon from "sinon";
 import temp from "temp";
+import asyncPackageJson from "../../../../../node_modules/async/package.json";
 import createMockExec from "../../../helpers/mockExec.js";
 import createMockTemp from "../../../helpers/mockTemp.js";
 import fileSystem from "fs-extra";
-import unzip from "unzip2";
-import Async from "flowsync";
 
 temp.track();
 
@@ -14,7 +13,6 @@ describe("AkiroBuilder(event, context)", () => {
 			context,
 			akiroBuilder,
 
-			localFilePath,
 			nodeModulesDirectoryPath,
 			temporaryDirectoryPath,
 
@@ -38,7 +36,11 @@ describe("AkiroBuilder(event, context)", () => {
 	});
 
 	beforeEach(function (done) {
+
+
 		event = {
+			region: "us-east-1",
+			bucket: "akiro.test",
 			package: {
 				name: "async",
 				version: "1.0.0"
@@ -49,11 +51,7 @@ describe("AkiroBuilder(event, context)", () => {
 
 		mockNpmPath = `${nodeModulesDirectoryPath}/npm/bin/npm-cli.js`;
 		mockExec = createMockExec({
-			[`cd ${temporaryDirectoryPath};node ${mockNpmPath} install`]: (commandDone) => {
-				fileSystem.copy(`${nodeModulesDirectoryPath}/async`, `${temporaryDirectoryPath}/node_modules/async`, (error) => {
-					commandDone(error);
-				});
-			},
+			[`cd ${temporaryDirectoryPath};node ${mockNpmPath} install`]: execDone => execDone(),
 			[`cd ${temporaryDirectoryPath};node ${mockNpmPath} init -y`]: execDone => {
 				fileSystem.copySync(`${__dirname}/../../../fixtures/newPackage.json`, `${temporaryDirectoryPath}/package.json`);
 				execDone();
@@ -83,10 +81,7 @@ describe("AkiroBuilder(event, context)", () => {
 			S3: MockS3
 		};
 
-		localFilePath = `${temporaryDirectoryPath}/local.zip`;
-
 		context = {
-			localFilePath: localFilePath,
 			AWS: mockAWS,
 			exec: mockExec,
 			npmPath: mockNpmPath,
@@ -99,40 +94,29 @@ describe("AkiroBuilder(event, context)", () => {
 		akiroBuilder.invoke(event, context);
 	});
 
-	describe("(With context.localFilePath set)", () => {
-		it("should copy the .zip file to the designated local file path", () => {
-			/* eslint-disable new-cap */
-			const zipFixturePath = `${__dirname}/../../../fixtures/async-1.0.0.zip`;
+	describe("(With event.bucket and event.region set)", () => {
+		it("should instantiate S3 with the designated region", () => {
+			s3ConstructorSpy.calledWith({
+				region: event.region
+			}).should.be.true;
+		});
 
-			let localFilePaths = [];
-			let expectedFilePaths = [];
-			Async.series([
-				(done) => {
-					fileSystem.createReadStream(context.localFilePath)
-						.pipe(unzip.Parse())
-						.on("entry", (entry) => {
-							localFilePaths.push(entry.path);
-						})
-						.on("close", done);
-				},
-				(done) => {
-					fileSystem.createReadStream(zipFixturePath)
-						.pipe(unzip.Parse())
-						.on("entry", (entry) => {
-							expectedFilePaths.push(entry.path);
-						})
-						.on("close", done);
-				}
-			], () => {
-				localFilePaths.should.eql(expectedFilePaths);
-			});
+		it("should copy the .zip file to the designated S3 options", () => {
+			const zipFileName = `${event.package.name}-${asyncPackageJson.version}.zip`;
+			const zipFileData = fileSystem.readFileSync(`${__dirname}/../../../fixtures/async-1.5.2.zip`);
+			const putObjectParameters = {
+				Bucket: event.bucket,
+				Key: zipFileName,
+				Body: zipFileData
+			};
+			mockS3.putObject.calledWith(putObjectParameters);
 		});
 	});
 
-	describe("(WITHOUT context.localFilePath set)", () => {
+	describe("(WITHOUT event.bucket or event.region set)", () => {
 		beforeEach(done => {
-			fileSystem.unlinkSync(localFilePath);
-			context.localFilePath = undefined;
+			event.region = undefined;
+			event.bucket = undefined;
 
 			context.succeed = (data) => { done(null, data); };
 
@@ -140,8 +124,10 @@ describe("AkiroBuilder(event, context)", () => {
 			akiroBuilder.invoke(event, context);
 		});
 
-		it("should not copy the .zip file to a local file path", () => {
-			fileSystem.existsSync(localFilePath).should.be.false;
+		it("should NOT instantiate S3 with the designated region", () => {
+			s3ConstructorSpy.calledWith({
+				region: event.region
+			}).should.be.false;
 		});
 	});
 });

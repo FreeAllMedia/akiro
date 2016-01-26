@@ -1,13 +1,22 @@
 "use strict";
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+var oldWrite = process.stdout.write;
+process.stdout.write = function () {};
 
-var cat = Symbol();
-
-var something = _defineProperty({}, cat, "foo");
-
-console.log(something["cat"]);
-console.log(something[cat]);
+var npm = require("npm");
+npm.load({ loglevel: "silent" }, function (err) {
+		// install module ffi
+		npm.commands.info(["async@1.1.x"], function (er, data) {
+				process.stdout.write = oldWrite;
+				if (er) {
+						throw er;
+				}
+				var versionNumbers = Object.keys(data);
+				var latestVersion = versionNumbers[versionNumbers.length - 1];
+				console.log(latestVersion);
+				// log errors or data
+		});
+});
 
 // /* eslint-disable no-console */
 //

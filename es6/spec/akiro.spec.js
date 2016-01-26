@@ -1,7 +1,7 @@
 import Akiro from "../lib/akiro.js";
 import Conan from "conan";
 import temp from "temp";
-import { exec } from "child_process";
+import { exec, execSync } from "child_process";
 import AWS from "aws-sdk";
 import Async from "flowsync";
 
@@ -132,6 +132,24 @@ describe("Akiro(config)", () => {
 		describe("(When akiro.config.exec is NOT set)", () => {
 			it("should set akiro.exec to the exec package", () => {
 				akiro.exec.should.eql(exec);
+			});
+		});
+	});
+
+	describe("akiro.execSync", () => {
+		describe("(When akiro.config.execSync is set)", () => {
+			it("should set akiro.execSync to akiro.config.execSync", () => {
+				const mockExecSync = {};
+				config = {
+					execSync: mockExecSync
+				};
+				akiro = new Akiro(config);
+				akiro.execSync.should.eql(mockExecSync);
+			});
+		});
+		describe("(When akiro.config.execSync is NOT set)", () => {
+			it("should set akiro.execSync to the execSync package", () => {
+				akiro.execSync.should.eql(execSync);
 			});
 		});
 	});

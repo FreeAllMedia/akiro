@@ -128,7 +128,7 @@ describe("AkiroBuilder(event, context)", function () {
 
 		it("should copy the .zip file to the designated S3 options", function () {
 			var zipFileName = event["package"].name + "-" + _node_modulesAsyncPackageJson2["default"].version + ".zip";
-			var zipFileData = _fsExtra2["default"].readFileSync(__dirname + "/../../../fixtures/async-1.0.0.zip");
+			var zipFileData = _fsExtra2["default"].readFileSync(__dirname + "/../../../fixtures/async-1.5.2.zip");
 			var putObjectParameters = {
 				Bucket: event.bucket,
 				Key: zipFileName,

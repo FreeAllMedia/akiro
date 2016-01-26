@@ -6,7 +6,7 @@ import glob from "glob";
 import fileSystem from "fs-extra";
 import path from "path";
 
-// temp.track();
+temp.track();
 
 describe("akiro.package(packageDetails, outputDirectoryPath, callback)", () => {
 	let config,
@@ -18,6 +18,9 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", () => {
 			cacheDirectoryPath,
 			outputDirectoryPath,
 
+			asyncZipFileName,
+			asyncZipFilePath,
+
 			mockAsync,
 			mockAWS,
 			mockS3,
@@ -27,15 +30,14 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", () => {
 			s3ConstructorSpy;
 
 	beforeEach(function (done) {
-		this.timeout(300000);
 
 		packageDetails = {
-			"async": "1.0.0",
+			"async": "1.x.x",
 			"incognito": "0.1.4"
 		};
 
 		outputDirectoryPath = path.normalize(`${__dirname}/../../../temp`); //temp.mkdirSync("akiro.output");
-		cacheDirectoryPath = `${temp.mkdirSync("akiro.cache")}/cache`;
+		cacheDirectoryPath = `${temp.mkdirSync("akiro.cache")}`;
 
 		lambdaConstructorSpy = sinon.spy();
 		s3ConstructorSpy = sinon.spy();
@@ -56,9 +58,12 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", () => {
 			})
 		};
 
+		asyncZipFileName = "async-1.5.2.zip";
+		asyncZipFilePath = `${__dirname}/../fixtures/${asyncZipFileName}`;
+
 		const mockS3GetObjectAsyncRequest = {
 			createReadStream: () => {
-				return fileSystem.createReadStream(`${__dirname}/../fixtures/async-1.0.0.zip`);
+				return fileSystem.createReadStream(asyncZipFilePath);
 			}
 		};
 
@@ -71,10 +76,12 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", () => {
 		mockS3 = {
 			getObject: sinon.spy((parameters) => {
 				switch (parameters.Key) {
-					case "async-1.0.0.zip":
+					case "async-1.5.2.zip":
 						return mockS3GetObjectAsyncRequest;
 					case "incognito-0.1.4.zip":
 						return mockS3GetObjectIncognitoRequest;
+					default:
+						throw parameters.Key;
 				}
 			})
 		};
@@ -127,7 +134,7 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", () => {
 	it("should create the cache directory if it doesn't already exist", () => {
 		fileSystem.existsSync(cacheDirectoryPath).should.be.true;
 	});
-	
+
 	describe("(Lambda Invoking)", () => {
 		it("should invoke the Akiro Builder lambda functions in parallel", () => {
 			mockAsync.parallel.called.should.be.true;
@@ -164,25 +171,6 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", () => {
 		});
 	});
 
-	describe("(When an Akiro Builder Lambda invoke fails)", () => {
-		let error;
-
-		beforeEach(done => {
-			mockLambda.invoke = (parameters, invokeCallback) => {
-				invokeCallback(new Error());
-			};
-
-			akiro.package(packageDetails, outputDirectoryPath, (packageError) => {
-				error = packageError;
-				done();
-			});
-		});
-
-		it("should return the error", () => {
-			error.should.be.instanceOf(Error);
-		});
-	});
-
 	describe("(When a local cached version is not available)", () => {
 		it("should download each zipped package file in parallel", () => {
 			mockAsync.parallel.calledTwice.should.be.true;
@@ -192,7 +180,7 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", () => {
 			let fileName;
 
 			beforeEach(() => {
-				fileName = "async-1.0.0.zip";
+				fileName = "async-1.5.2.zip";
 			});
 
 			it("should call S3 for the correct package zip file", () => {
@@ -242,9 +230,5 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", () => {
 
 			outputDirectoryFilePaths.should.eql(expectedFilePaths);
 		});
-	});
-
-	describe("(When a local cached version is available)", () => {
-		it("should copy the package files to the output directory from the cached .zip files");
 	});
 });

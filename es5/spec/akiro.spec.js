@@ -154,6 +154,24 @@ describe("Akiro(config)", function () {
 		});
 	});
 
+	describe("akiro.execSync", function () {
+		describe("(When akiro.config.execSync is set)", function () {
+			it("should set akiro.execSync to akiro.config.execSync", function () {
+				var mockExecSync = {};
+				config = {
+					execSync: mockExecSync
+				};
+				akiro = new _libAkiroJs2["default"](config);
+				akiro.execSync.should.eql(mockExecSync);
+			});
+		});
+		describe("(When akiro.config.execSync is NOT set)", function () {
+			it("should set akiro.execSync to the execSync package", function () {
+				akiro.execSync.should.eql(_child_process.execSync);
+			});
+		});
+	});
+
 	describe("akiro.cacheDirectoryPath", function () {
 		describe("(When akiro.config.cacheDirectoryPath is set)", function () {
 			it("should set akiro.cacheDirectoryPath to akiro.config.cacheDirectoryPath", function () {
