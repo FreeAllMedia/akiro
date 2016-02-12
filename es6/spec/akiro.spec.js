@@ -18,9 +18,9 @@ describe("Akiro(config)", () => {
 	});
 
 	it("should not require a config object", () => {
-		() => {
+		(() => {
 			akiro = new Akiro();
-		}.should.not.throw();
+		}).should.not.throw();
 	});
 
 	describe("akiro.conan", () => {
@@ -47,9 +47,9 @@ describe("Akiro(config)", () => {
 		});
 
 		it("should be read-only", () => {
-			() => {
+			(() => {
 				akiro.config = { new: "config" };
-			}.should.throw();
+			}).should.throw();
 		});
 	});
 

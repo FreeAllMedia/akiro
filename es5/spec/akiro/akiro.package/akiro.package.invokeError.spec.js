@@ -1,12 +1,8 @@
 "use strict";
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+var _akiro = require("../../../lib/akiro.js");
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _libAkiroJs = require("../../../lib/akiro.js");
-
-var _libAkiroJs2 = _interopRequireDefault(_libAkiroJs);
+var _akiro2 = _interopRequireDefault(_akiro);
 
 var _temp = require("temp");
 
@@ -28,7 +24,11 @@ var _path = require("path");
 
 var _path2 = _interopRequireDefault(_path);
 
-_temp2["default"].track();
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+_temp2.default.track();
 
 describe("akiro.package(packageDetails, outputDirectoryPath, callback)", function () {
 	var config = undefined,
@@ -53,18 +53,18 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", functio
 			"incognito": "0.1.4"
 		};
 
-		outputDirectoryPath = _path2["default"].normalize(__dirname + "/../../../../temp"); //temp.mkdirSync("akiro.output");
-		cacheDirectoryPath = "" + _temp2["default"].mkdirSync("akiro.cache");
+		outputDirectoryPath = _path2.default.normalize(__dirname + "/../../../../temp"); //temp.mkdirSync("akiro.output");
+		cacheDirectoryPath = "" + _temp2.default.mkdirSync("akiro.cache");
 
-		lambdaConstructorSpy = _sinon2["default"].spy();
-		s3ConstructorSpy = _sinon2["default"].spy();
+		lambdaConstructorSpy = _sinon2.default.spy();
+		s3ConstructorSpy = _sinon2.default.spy();
 
 		mockAsync = {
-			parallel: _sinon2["default"].spy(_flowsync2["default"].parallel)
+			parallel: _sinon2.default.spy(_flowsync2.default.parallel)
 		};
 
 		mockLambda = {
-			invoke: _sinon2["default"].spy(function (parameters, invokeCallback) {
+			invoke: _sinon2.default.spy(function (parameters, invokeCallback) {
 				invokeCallback(new Error());
 			})
 		};
@@ -74,18 +74,18 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", functio
 
 		var mockS3GetObjectAsyncRequest = {
 			createReadStream: function createReadStream() {
-				return _fsExtra2["default"].createReadStream(asyncZipFilePath);
+				return _fsExtra2.default.createReadStream(asyncZipFilePath);
 			}
 		};
 
 		var mockS3GetObjectIncognitoRequest = {
 			createReadStream: function createReadStream() {
-				return _fsExtra2["default"].createReadStream(__dirname + "/../../fixtures/incognito-0.1.4.zip");
+				return _fsExtra2.default.createReadStream(__dirname + "/../../fixtures/incognito-0.1.4.zip");
 			}
 		};
 
 		mockS3 = {
-			getObject: _sinon2["default"].spy(function (parameters) {
+			getObject: _sinon2.default.spy(function (parameters) {
 				switch (parameters.Key) {
 					case "async-1.5.2.zip":
 						return mockS3GetObjectAsyncRequest;
@@ -124,9 +124,9 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", functio
 			cacheDirectoryPath: cacheDirectoryPath
 		};
 
-		akiro = new _libAkiroJs2["default"](config);
+		akiro = new _akiro2.default(config);
 
-		akiro["package"](packageDetails, outputDirectoryPath, function (packageError) {
+		akiro.package(packageDetails, outputDirectoryPath, function (packageError) {
 			error = packageError;
 			done();
 		});

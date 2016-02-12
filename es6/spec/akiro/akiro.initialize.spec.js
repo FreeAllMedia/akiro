@@ -45,7 +45,6 @@ describe("akiro.initialize(iamRoleName, callback)", () => {
 		const rootPath = path.normalize(`${__dirname}/../../../`);
 
 		lambdaFilePath = `${rootPath}es6/lib/akiro/builders/nodejs/akiroBuilder.js`;
-		handlerFilePath = `${rootPath}es6/lib/akiro/builders/nodejs/handler.js`;
 		const npmPath = `${rootPath}node_modules/npm/bin/npm-cli.js`;
 
 		const nodeModulesDirectoryPath = `${rootPath}/node_modules`;
@@ -112,7 +111,11 @@ describe("akiro.initialize(iamRoleName, callback)", () => {
 		});
 
 		it("should use the supplied handlerFilePath", () => {
-			mockConanLambda.filePath.firstCall.args[0].should.eql(handlerFilePath);
+			mockConanLambda.filePath.firstCall.args[0].should.eql(lambdaFilePath);
+		});
+
+		it("should use change the handler to 'invoke'", () => {
+			mockConanLambda.handler.firstCall.args[0].should.eql("invoke");
 		});
 
 		it("should use the supplied role", () => {
@@ -132,8 +135,7 @@ describe("akiro.initialize(iamRoleName, callback)", () => {
 
 		it("should include akiroBuilder and dependencies in the temp directory", () => {
 			let dependencyPaths = [
-				[lambdaFilePath],
-				[`${temporaryDirectoryPath}/node_modules/**/*`]
+				[`${temporaryDirectoryPath}/node_modules/**/*`, "/node_modules"]
 			];
 
 			mockConanLambda.dependencies().should.eql(dependencyPaths);

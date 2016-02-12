@@ -4,13 +4,7 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _temp = require("temp");
 
@@ -42,14 +36,20 @@ var _awsSdk = require("aws-sdk");
 
 var _awsSdk2 = _interopRequireDefault(_awsSdk);
 
-var AkiroBuilder = (function () {
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var AkiroBuilder = function () {
 	function AkiroBuilder(event, context) {
 		_classCallCheck(this, AkiroBuilder);
 
-		this.AWS = context.AWS || _awsSdk2["default"];
+		this.AWS = context.AWS || _awsSdk2.default;
 		this.exec = context.exec || _child_process.exec;
-		this.temp = context.temp || _temp2["default"];
-		this.fileSystem = context.fileSystem || _fsExtra2["default"];
+		this.temp = context.temp || _temp2.default;
+		this.fileSystem = context.fileSystem || _fsExtra2.default;
 		this.npmPath = context.npmPath || "./node_modules/npm/bin/npm-cli.js";
 	}
 
@@ -60,7 +60,7 @@ var AkiroBuilder = (function () {
 
 			var parameters = {};
 
-			_flowsync2["default"].series([function (done) {
+			_flowsync2.default.series([function (done) {
 				_this.temp.mkdir("akiroBuilder", function (error, temporaryDirectoryPath) {
 					parameters.temporaryDirectoryPath = temporaryDirectoryPath;
 					done(error);
@@ -69,7 +69,7 @@ var AkiroBuilder = (function () {
 				var temporaryDirectoryPath = parameters.temporaryDirectoryPath;
 				var commands = ["cd " + temporaryDirectoryPath, "node " + _this.npmPath + " init -y"];
 				_this.exec(commands.join(";"), function (initError) {
-					_this.exec("npm info " + event["package"].name + " version", function (infoError, stdOut) {
+					_this.exec("npm info " + event.package.name + " version", function (infoError, stdOut) {
 						var version = stdOut;
 						parameters.version = version;
 						done(initError);
@@ -79,7 +79,7 @@ var AkiroBuilder = (function () {
 				var temporaryDirectoryPath = parameters.temporaryDirectoryPath;
 				var packageJsonFilePath = temporaryDirectoryPath + "/package.json";
 				var packageJson = require(packageJsonFilePath);
-				packageJson.dependencies = _defineProperty({}, event["package"].name, event["package"].version);
+				packageJson.dependencies = _defineProperty({}, event.package.name, event.package.version);
 				_this.fileSystem.writeFile(packageJsonFilePath, JSON.stringify(packageJson), function (error) {
 					done(error);
 				});
@@ -91,15 +91,15 @@ var AkiroBuilder = (function () {
 				});
 			}, function (done) {
 				var temporaryDirectoryPath = parameters.temporaryDirectoryPath;
-				var packagesZip = (0, _archiver2["default"])("zip", {});
+				var packagesZip = (0, _archiver2.default)("zip", {});
 				var nodeModulesGlob = temporaryDirectoryPath + "/node_modules/**/*";
 
-				(0, _glob2["default"])(nodeModulesGlob, { dot: true }, function (error, filePaths) {
+				(0, _glob2.default)(nodeModulesGlob, { dot: true }, function (error, filePaths) {
 					filePaths.forEach(function (filePath) {
 						var isDirectory = _this.fileSystem.statSync(filePath).isDirectory();
 						if (!isDirectory) {
 							var fileReadStream = _this.fileSystem.createReadStream(filePath);
-							var relativeFilePath = _path2["default"].relative(temporaryDirectoryPath + "/node_modules/", filePath);
+							var relativeFilePath = _path2.default.relative(temporaryDirectoryPath + "/node_modules/", filePath);
 							packagesZip.append(fileReadStream, { name: relativeFilePath });
 						}
 					});
@@ -122,7 +122,7 @@ var AkiroBuilder = (function () {
 
 					var packageZipReadBuffer = _this.fileSystem.readFileSync(packageZipFilePath);
 
-					var fileName = event["package"].name + "-" + version + ".zip";
+					var fileName = event.package.name + "-" + version + ".zip";
 
 					parameters.fileName = fileName;
 
@@ -138,7 +138,7 @@ var AkiroBuilder = (function () {
 				if (context.localFilePath) {
 					var temporaryDirectoryPath = parameters.temporaryDirectoryPath;
 					var packageZipFilePath = temporaryDirectoryPath + "/package.zip";
-					_fsExtra2["default"].copy(packageZipFilePath, context.localFilePath, done);
+					_fsExtra2.default.copy(packageZipFilePath, context.localFilePath, done);
 				} else {
 					done();
 				}
@@ -155,7 +155,6 @@ var AkiroBuilder = (function () {
 	}]);
 
 	return AkiroBuilder;
-})();
+}();
 
-exports["default"] = AkiroBuilder;
-module.exports = exports["default"];
+exports.default = AkiroBuilder;

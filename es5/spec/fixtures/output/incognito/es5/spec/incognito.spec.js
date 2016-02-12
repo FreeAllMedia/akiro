@@ -1,6 +1,6 @@
 "use strict";
 
-var _createClass = (function () {
+var _createClass = function () {
 	function defineProperties(target, props) {
 		for (var i = 0; i < props.length; i++) {
 			var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -8,7 +8,7 @@ var _createClass = (function () {
 	}return function (Constructor, protoProps, staticProps) {
 		if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
 	};
-})();
+}();
 
 function _interopRequireDefault(obj) {
 	return obj && obj.__esModule ? obj : { "default": obj };
@@ -24,7 +24,7 @@ var _ = require("../../");
 
 var _2 = _interopRequireDefault(_);
 
-var Cup = (function () {
+var Cup = function () {
 	function Cup() {
 		_classCallCheck(this, Cup);
 
@@ -44,9 +44,9 @@ var Cup = (function () {
 	}]);
 
 	return Cup;
-})();
+}();
 
-var Glass = (function () {
+var Glass = function () {
 	function Glass() {
 		_classCallCheck(this, Glass);
 
@@ -61,7 +61,7 @@ var Glass = (function () {
 	}]);
 
 	return Glass;
-})();
+}();
 
 describe("Incognito", function () {
 	var cup = undefined,

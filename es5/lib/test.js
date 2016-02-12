@@ -1,41 +1,34 @@
 "use strict";
 
-var oldWrite = process.stdout.write;
-process.stdout.write = function () {};
+var _conan = require("conan");
 
-var npm = require("npm");
-npm.load({ loglevel: "silent" }, function (err) {
-		// install module ffi
-		npm.commands.info(["async@1.1.x"], function (er, data) {
-				process.stdout.write = oldWrite;
-				if (er) {
-						throw er;
-				}
-				var versionNumbers = Object.keys(data);
-				var latestVersion = versionNumbers[versionNumbers.length - 1];
-				console.log(latestVersion);
-				// log errors or data
-		});
-});
+var _conan2 = _interopRequireDefault(_conan);
 
-// /* eslint-disable no-console */
-//
-// import packageJson from "../../package.json";
-//
-// import Akiro from "./akiro.js";
-//
-// const akiro = new Akiro();
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var conan = new _conan2.default({
+	region: "us-east-1"
+
+}); /* eslint-disable no-console */
+
+//import Akiro from "./akiro.js";
+
+// const akiro = new Akiro({
+// 	region: "us-east-1",
+// 	bucket: "akiro.test"
+// });
 //
 // const iamRoleName = "AWSLambda";
 //
+// console.log("Deploying Akiro.");
 // akiro.initialize(iamRoleName, (error) => {
 // 	if (error) { throw error; }
 // 	console.log("Akiro deployed.");
+// });
+
+// const outputDirectory = `${__dirname}/../../testOutput/`;
 //
-// 	const outputDirectory = `${__dirname}/../../testOutput/`;
-//
-// 	akiro.package(packageJson.dependencies, outputDirectory, (packageError) => {
-// 		if (packageError) { throw packageError; }
-// 		console.log("Akiro deployed.");
-// 	});
+// akiro.package(packageJson.dependencies, outputDirectory, (packageError) => {
+// 	if (packageError) { throw packageError; }
+// 	console.log("Akiro deployed.");
 // });

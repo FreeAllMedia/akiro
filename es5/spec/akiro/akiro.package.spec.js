@@ -1,12 +1,8 @@
 "use strict";
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+var _akiro = require("../../lib/akiro.js");
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _libAkiroJs = require("../../lib/akiro.js");
-
-var _libAkiroJs2 = _interopRequireDefault(_libAkiroJs);
+var _akiro2 = _interopRequireDefault(_akiro);
 
 var _temp = require("temp");
 
@@ -32,7 +28,11 @@ var _path = require("path");
 
 var _path2 = _interopRequireDefault(_path);
 
-_temp2["default"].track();
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+_temp2.default.track();
 
 describe("akiro.package(packageDetails, outputDirectoryPath, callback)", function () {
 	var config = undefined,
@@ -57,21 +57,21 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", functio
 			"incognito": "0.1.4"
 		};
 
-		outputDirectoryPath = _path2["default"].normalize(__dirname + "/../../../temp"); //temp.mkdirSync("akiro.output");
-		cacheDirectoryPath = "" + _temp2["default"].mkdirSync("akiro.cache");
+		outputDirectoryPath = _path2.default.normalize(__dirname + "/../../../temp"); //temp.mkdirSync("akiro.output");
+		cacheDirectoryPath = "" + _temp2.default.mkdirSync("akiro.cache");
 
-		lambdaConstructorSpy = _sinon2["default"].spy();
-		s3ConstructorSpy = _sinon2["default"].spy();
+		lambdaConstructorSpy = _sinon2.default.spy();
+		s3ConstructorSpy = _sinon2.default.spy();
 
 		mockAsync = {
-			parallel: _sinon2["default"].spy(_flowsync2["default"].parallel)
+			parallel: _sinon2.default.spy(_flowsync2.default.parallel)
 		};
 
 		mockLambda = {
-			invoke: _sinon2["default"].spy(function (parameters, invokeCallback) {
+			invoke: _sinon2.default.spy(function (parameters, invokeCallback) {
 				var payloadData = JSON.parse(parameters.Payload);
-				var packageName = payloadData["package"].name;
-				var packageVersion = payloadData["package"].version;
+				var packageName = payloadData.package.name;
+				var packageVersion = payloadData.package.version;
 
 				invokeCallback(null, {
 					fileName: packageName + "-" + packageVersion + ".zip"
@@ -84,18 +84,18 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", functio
 
 		var mockS3GetObjectAsyncRequest = {
 			createReadStream: function createReadStream() {
-				return _fsExtra2["default"].createReadStream(asyncZipFilePath);
+				return _fsExtra2.default.createReadStream(asyncZipFilePath);
 			}
 		};
 
 		var mockS3GetObjectIncognitoRequest = {
 			createReadStream: function createReadStream() {
-				return _fsExtra2["default"].createReadStream(__dirname + "/../fixtures/incognito-0.1.4.zip");
+				return _fsExtra2.default.createReadStream(__dirname + "/../fixtures/incognito-0.1.4.zip");
 			}
 		};
 
 		mockS3 = {
-			getObject: _sinon2["default"].spy(function (parameters) {
+			getObject: _sinon2.default.spy(function (parameters) {
 				switch (parameters.Key) {
 					case "async-1.5.2.zip":
 						return mockS3GetObjectAsyncRequest;
@@ -134,31 +134,31 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", functio
 			cacheDirectoryPath: cacheDirectoryPath
 		};
 
-		akiro = new _libAkiroJs2["default"](config);
+		akiro = new _akiro2.default(config);
 
 		callback = done;
-		akiro["package"](packageDetails, outputDirectoryPath, callback);
+		akiro.package(packageDetails, outputDirectoryPath, callback);
 	});
 
 	it("should instantiate Lambda with the designated region", function () {
 		lambdaConstructorSpy.calledWith({
 			region: config.region
-		}).should.be["true"];
+		}).should.be.true;
 	});
 
 	it("should instantiate S3 with the designated region", function () {
 		s3ConstructorSpy.calledWith({
 			region: config.region
-		}).should.be["true"];
+		}).should.be.true;
 	});
 
 	it("should create the cache directory if it doesn't already exist", function () {
-		_fsExtra2["default"].existsSync(cacheDirectoryPath).should.be["true"];
+		_fsExtra2.default.existsSync(cacheDirectoryPath).should.be.true;
 	});
 
 	describe("(Lambda Invoking)", function () {
 		it("should invoke the Akiro Builder lambda functions in parallel", function () {
-			mockAsync.parallel.called.should.be["true"];
+			mockAsync.parallel.called.should.be.true;
 		});
 
 		it("should invoke the Akiro Builder lambda function on AWS for each dependency (mock One)", function () {
@@ -167,7 +167,7 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", functio
 				Payload: JSON.stringify({
 					bucket: config.bucket,
 					region: config.region,
-					"package": {
+					package: {
 						name: "async",
 						version: packageDetails.async
 					}
@@ -182,7 +182,7 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", functio
 				Payload: JSON.stringify({
 					bucket: config.bucket,
 					region: config.region,
-					"package": {
+					package: {
 						name: "incognito",
 						version: packageDetails.incognito
 					}
@@ -194,7 +194,7 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", functio
 
 	describe("(When a local cached version is not available)", function () {
 		it("should download each zipped package file in parallel", function () {
-			mockAsync.parallel.calledTwice.should.be["true"];
+			mockAsync.parallel.calledTwice.should.be.true;
 		});
 
 		describe("(Mock Package One)", function () {
@@ -210,11 +210,11 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", functio
 					Key: fileName
 				};
 
-				mockS3.getObject.calledWith(expectedParameters).should.be["true"];
+				mockS3.getObject.calledWith(expectedParameters).should.be.true;
 			});
 
 			it("should download each zipped package files to the akiro cache directory", function () {
-				_fsExtra2["default"].existsSync(cacheDirectoryPath + "/" + fileName).should.be["true"];
+				_fsExtra2.default.existsSync(cacheDirectoryPath + "/" + fileName).should.be.true;
 			});
 		});
 
@@ -231,21 +231,21 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", functio
 					Key: fileName
 				};
 
-				mockS3.getObject.calledWith(expectedParameters).should.be["true"];
+				mockS3.getObject.calledWith(expectedParameters).should.be.true;
 			});
 
 			it("should download each zipped package files to the akiro cache directory", function () {
-				_fsExtra2["default"].existsSync(cacheDirectoryPath + "/" + fileName).should.be["true"];
+				_fsExtra2.default.existsSync(cacheDirectoryPath + "/" + fileName).should.be.true;
 			});
 		});
 
 		it("should copy the unzipped package files to the outputDirectoryPath provided", function () {
-			var outputDirectoryFilePaths = _glob2["default"].sync(outputDirectoryPath + "/**/*", { dot: true }).map(function (filePath) {
+			var outputDirectoryFilePaths = _glob2.default.sync(outputDirectoryPath + "/**/*", { dot: true }).map(function (filePath) {
 				return filePath.replace(outputDirectoryPath, "");
 			});
 
-			var fixturesOutputDirectoryPath = _path2["default"].normalize(__dirname + "/../fixtures/output");
-			var expectedFilePaths = _glob2["default"].sync(fixturesOutputDirectoryPath + "/**/*", { dot: true }).map(function (filePath) {
+			var fixturesOutputDirectoryPath = _path2.default.normalize(__dirname + "/../fixtures/output");
+			var expectedFilePaths = _glob2.default.sync(fixturesOutputDirectoryPath + "/**/*", { dot: true }).map(function (filePath) {
 				return filePath.replace(fixturesOutputDirectoryPath, "");
 			});
 

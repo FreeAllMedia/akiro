@@ -46,10 +46,8 @@ export default class Akiro {
 		const lambdaName = "AkiroBuilder";
 		const lambdaRole = iamRoleName;
 		const lambdaFilePath = __dirname + "/akiro/builders/nodejs/akiroBuilder.js";
-		const handlerFilePath = __dirname + "/akiro/builders/nodejs/handler.js";
 
-		const lambda = conan.lambda(lambdaName, handlerFilePath, lambdaRole);
-		lambda.dependencies(lambdaFilePath);
+		const lambda = conan.lambda(lambdaName, lambdaFilePath, lambdaRole).handler("invoke");
 
 		const createBuilderTask = (dependencyName, dependencyVersionRange, temporaryDirectoryPath) => {
 			return (done) => {
@@ -94,7 +92,7 @@ export default class Akiro {
 					this.Async.series(builderDependencyTasks, done);
 				}
 			], () => {
-				lambda.dependencies(`${temporaryDirectoryPath}/node_modules/**/*`);
+				lambda.dependencies(`${temporaryDirectoryPath}/node_modules/**/*`, "/node_modules");
 				conan.deploy(callback);
 			});
 		});

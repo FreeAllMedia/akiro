@@ -1,53 +1,53 @@
 "use strict";
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _ = require("../../");
 
 var _2 = _interopRequireDefault(_);
 
-var Cup = (function () {
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Cup = function () {
 	function Cup() {
 		_classCallCheck(this, Cup);
 
-		(0, _2["default"])(this).content = "wine";
+		(0, _2.default)(this).content = "wine";
 	}
 
 	_createClass(Cup, [{
 		key: "getContent",
 		value: function getContent() {
-			return (0, _2["default"])(this).content;
+			return (0, _2.default)(this).content;
 		}
 	}, {
 		key: "clean",
 		value: function clean() {
-			(0, _2["default"])(this).content = null;
+			(0, _2.default)(this).content = null;
 		}
 	}]);
 
 	return Cup;
-})();
+}();
 
-var Glass = (function () {
+var Glass = function () {
 	function Glass() {
 		_classCallCheck(this, Glass);
 
-		(0, _2["default"])(this).content = "water";
+		(0, _2.default)(this).content = "water";
 	}
 
 	_createClass(Glass, [{
 		key: "getContent",
 		value: function getContent() {
-			return (0, _2["default"])(this).content;
+			return (0, _2.default)(this).content;
 		}
 	}]);
 
 	return Glass;
-})();
+}();
 
 describe("Incognito", function () {
 	var cup = undefined,

@@ -1,14 +1,8 @@
 "use strict";
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+var _akiroBuilder = require("../../../../lib/akiro/builders/nodejs/akiroBuilder.js");
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-var _libAkiroBuildersNodejsAkiroBuilderJs = require("../../../../lib/akiro/builders/nodejs/akiroBuilder.js");
-
-var _libAkiroBuildersNodejsAkiroBuilderJs2 = _interopRequireDefault(_libAkiroBuildersNodejsAkiroBuilderJs);
+var _akiroBuilder2 = _interopRequireDefault(_akiroBuilder);
 
 var _sinon = require("sinon");
 
@@ -20,27 +14,33 @@ var _temp2 = _interopRequireDefault(_temp);
 
 var _child_process = require("child_process");
 
-var _packageJson = require("../../../../../package.json");
+var _package = require("../../../../../package.json");
 
-var _packageJson2 = _interopRequireDefault(_packageJson);
+var _package2 = _interopRequireDefault(_package);
 
 var _awsSdk = require("aws-sdk");
 
 var _awsSdk2 = _interopRequireDefault(_awsSdk);
 
-var _helpersMockExecJs = require("../../../helpers/mockExec.js");
+var _mockExec = require("../../../helpers/mockExec.js");
 
-var _helpersMockExecJs2 = _interopRequireDefault(_helpersMockExecJs);
+var _mockExec2 = _interopRequireDefault(_mockExec);
 
-var _helpersMockTempJs = require("../../../helpers/mockTemp.js");
+var _mockTemp = require("../../../helpers/mockTemp.js");
 
-var _helpersMockTempJs2 = _interopRequireDefault(_helpersMockTempJs);
+var _mockTemp2 = _interopRequireDefault(_mockTemp);
 
 var _fsExtra = require("fs-extra");
 
 var _fsExtra2 = _interopRequireDefault(_fsExtra);
 
-_temp2["default"].track();
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+_temp2.default.track();
 
 describe("AkiroBuilder(event, context)", function () {
 	var event = undefined,
@@ -56,14 +56,14 @@ describe("AkiroBuilder(event, context)", function () {
 	    mockFileSystem = undefined;
 
 	beforeEach(function (done) {
-		_temp2["default"].mkdir("akiroBuilder", function (error, newTemporaryDirectoryPath) {
+		_temp2.default.mkdir("akiroBuilder", function (error, newTemporaryDirectoryPath) {
 			temporaryDirectoryPath = newTemporaryDirectoryPath;
 			done();
 		});
 	});
 
 	afterEach(function (done) {
-		_temp2["default"].cleanup(done);
+		_temp2.default.cleanup(done);
 	});
 
 	beforeEach(function (done) {
@@ -71,34 +71,34 @@ describe("AkiroBuilder(event, context)", function () {
 
 		event = {
 			region: "us-east-1",
-			"package": {
+			package: {
 				name: "async",
-				version: _packageJson2["default"].dependencies.async
+				version: _package2.default.dependencies.async
 			}
 		};
 
 		nodeModulesDirectoryPath = __dirname + "/../../../../../node_modules";
 
 		mockNpmPath = nodeModulesDirectoryPath + "/npm/bin/npm-cli.js";
-		mockExec = (0, _helpersMockExecJs2["default"])((_createMockExec = {}, _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + mockNpmPath + " install", function (execDone) {
+		mockExec = (0, _mockExec2.default)((_createMockExec = {}, _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + mockNpmPath + " install", function undefined(execDone) {
 			return execDone();
-		}), _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + mockNpmPath + " init -y", function (execDone) {
-			_fsExtra2["default"].copySync(__dirname + "/../../../fixtures/newPackage.json", temporaryDirectoryPath + "/package.json");
+		}), _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + mockNpmPath + " init -y", function undefined(execDone) {
+			_fsExtra2.default.copySync(__dirname + "/../../../fixtures/newPackage.json", temporaryDirectoryPath + "/package.json");
 			execDone();
 		}), _defineProperty(_createMockExec, "npm info .*", function npmInfo(execDone) {
 			execDone(null, "1.5.0");
 		}), _createMockExec));
-		mockTemp = (0, _helpersMockTempJs2["default"])(temporaryDirectoryPath);
+		mockTemp = (0, _mockTemp2.default)(temporaryDirectoryPath);
 		mockFileSystem = {
-			writeFile: _sinon2["default"].spy(_fsExtra2["default"].writeFile),
-			statSync: _sinon2["default"].spy(_fsExtra2["default"].statSync),
-			createReadStream: _sinon2["default"].spy(_fsExtra2["default"].createReadStream),
-			createWriteStream: _sinon2["default"].spy(_fsExtra2["default"].createWriteStream),
-			copy: _sinon2["default"].spy(_fsExtra2["default"].copy)
+			writeFile: _sinon2.default.spy(_fsExtra2.default.writeFile),
+			statSync: _sinon2.default.spy(_fsExtra2.default.statSync),
+			createReadStream: _sinon2.default.spy(_fsExtra2.default.createReadStream),
+			createWriteStream: _sinon2.default.spy(_fsExtra2.default.createWriteStream),
+			copy: _sinon2.default.spy(_fsExtra2.default.copy)
 		};
 
 		mockS3 = {
-			putObject: _sinon2["default"].spy(function (parameters, callback) {
+			putObject: _sinon2.default.spy(function (parameters, callback) {
 				callback();
 			})
 		};
@@ -125,7 +125,7 @@ describe("AkiroBuilder(event, context)", function () {
 			fail: done
 		};
 
-		akiroBuilder = new _libAkiroBuildersNodejsAkiroBuilderJs2["default"](event, context);
+		akiroBuilder = new _akiroBuilder2.default(event, context);
 		akiroBuilder.invoke(event, context);
 	});
 
@@ -136,8 +136,8 @@ describe("AkiroBuilder(event, context)", function () {
 
 		it("should be set to the temp package if not provided", function () {
 			context.temp = undefined;
-			akiroBuilder = new _libAkiroBuildersNodejsAkiroBuilderJs2["default"](event, context);
-			akiroBuilder.temp.should.eql(_temp2["default"]);
+			akiroBuilder = new _akiroBuilder2.default(event, context);
+			akiroBuilder.temp.should.eql(_temp2.default);
 		});
 	});
 
@@ -148,7 +148,7 @@ describe("AkiroBuilder(event, context)", function () {
 
 		it("should be set to the npmPath package if not provided", function () {
 			context.npmPath = undefined;
-			akiroBuilder = new _libAkiroBuildersNodejsAkiroBuilderJs2["default"](event, context);
+			akiroBuilder = new _akiroBuilder2.default(event, context);
 			akiroBuilder.npmPath.should.eql("./node_modules/npm/bin/npm-cli.js");
 		});
 	});
@@ -160,7 +160,7 @@ describe("AkiroBuilder(event, context)", function () {
 
 		it("should be set to the exec package if not provided", function () {
 			context.exec = undefined;
-			akiroBuilder = new _libAkiroBuildersNodejsAkiroBuilderJs2["default"](event, context);
+			akiroBuilder = new _akiroBuilder2.default(event, context);
 			akiroBuilder.exec.should.eql(_child_process.exec);
 		});
 	});
@@ -172,8 +172,8 @@ describe("AkiroBuilder(event, context)", function () {
 
 		it("should be set to the AWS package if not provided", function () {
 			context.AWS = undefined;
-			akiroBuilder = new _libAkiroBuildersNodejsAkiroBuilderJs2["default"](event, context);
-			akiroBuilder.AWS.should.eql(_awsSdk2["default"]);
+			akiroBuilder = new _akiroBuilder2.default(event, context);
+			akiroBuilder.AWS.should.eql(_awsSdk2.default);
 		});
 	});
 
@@ -184,8 +184,8 @@ describe("AkiroBuilder(event, context)", function () {
 
 		it("should be set to the fileSystem package if not provided", function () {
 			context.fileSystem = undefined;
-			akiroBuilder = new _libAkiroBuildersNodejsAkiroBuilderJs2["default"](event, context);
-			akiroBuilder.fileSystem.should.eql(_fsExtra2["default"]);
+			akiroBuilder = new _akiroBuilder2.default(event, context);
+			akiroBuilder.fileSystem.should.eql(_fsExtra2.default);
 		});
 	});
 });

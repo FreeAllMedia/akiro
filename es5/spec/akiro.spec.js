@@ -1,10 +1,8 @@
 "use strict";
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+var _akiro = require("../lib/akiro.js");
 
-var _libAkiroJs = require("../lib/akiro.js");
-
-var _libAkiroJs2 = _interopRequireDefault(_libAkiroJs);
+var _akiro2 = _interopRequireDefault(_akiro);
 
 var _conan = require("conan");
 
@@ -24,6 +22,8 @@ var _flowsync = require("flowsync");
 
 var _flowsync2 = _interopRequireDefault(_flowsync);
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 describe("Akiro(config)", function () {
 	var akiro = undefined,
 	    config = undefined,
@@ -32,29 +32,29 @@ describe("Akiro(config)", function () {
 	beforeEach(function () {
 		config = {};
 
-		akiro = new _libAkiroJs2["default"](config);
+		akiro = new _akiro2.default(config);
 	});
 
 	it("should not require a config object", function () {
 		(function () {
-			akiro = new _libAkiroJs2["default"]();
-		}).should.not["throw"]();
+			akiro = new _akiro2.default();
+		}).should.not.throw();
 	});
 
 	describe("akiro.conan", function () {
 		describe("(When akiro.config.conan is set)", function () {
 			it("should set akiro.conan to akiro.config.conan", function () {
-				conan = new _conan2["default"]();
+				conan = new _conan2.default();
 				config = {
 					conan: conan
 				};
-				akiro = new _libAkiroJs2["default"](config);
+				akiro = new _akiro2.default(config);
 				akiro.conan.should.eql(conan);
 			});
 		});
 		describe("(When akiro.config.conan is NOT set)", function () {
 			it("should set akiro.conan to a new instance of Conan", function () {
-				akiro.conan.should.be.instanceOf(_conan2["default"]);
+				akiro.conan.should.be.instanceOf(_conan2.default);
 			});
 		});
 	});
@@ -66,8 +66,8 @@ describe("Akiro(config)", function () {
 
 		it("should be read-only", function () {
 			(function () {
-				akiro.config = { "new": "config" };
-			}).should["throw"]();
+				akiro.config = { new: "config" };
+			}).should.throw();
 		});
 	});
 
@@ -89,13 +89,13 @@ describe("Akiro(config)", function () {
 				config = {
 					temp: mockTemp
 				};
-				akiro = new _libAkiroJs2["default"](config);
+				akiro = new _akiro2.default(config);
 				akiro.temp.should.eql(mockTemp);
 			});
 		});
 		describe("(When akiro.config.temp is NOT set)", function () {
 			it("should set akiro.temp to the temp package", function () {
-				akiro.temp.should.eql(_temp2["default"]);
+				akiro.temp.should.eql(_temp2.default);
 			});
 		});
 	});
@@ -107,13 +107,13 @@ describe("Akiro(config)", function () {
 				config = {
 					AWS: mockAWS
 				};
-				akiro = new _libAkiroJs2["default"](config);
+				akiro = new _akiro2.default(config);
 				akiro.AWS.should.eql(mockAWS);
 			});
 		});
 		describe("(When akiro.config.AWS is NOT set)", function () {
 			it("should set akiro.AWS to the AWS package", function () {
-				akiro.AWS.should.eql(_awsSdk2["default"]);
+				akiro.AWS.should.eql(_awsSdk2.default);
 			});
 		});
 	});
@@ -125,13 +125,13 @@ describe("Akiro(config)", function () {
 				config = {
 					Async: mockAsync
 				};
-				akiro = new _libAkiroJs2["default"](config);
+				akiro = new _akiro2.default(config);
 				akiro.Async.should.eql(mockAsync);
 			});
 		});
 		describe("(When akiro.config.Async is NOT set)", function () {
 			it("should set akiro.Async to the Async package", function () {
-				akiro.Async.should.eql(_flowsync2["default"]);
+				akiro.Async.should.eql(_flowsync2.default);
 			});
 		});
 	});
@@ -143,7 +143,7 @@ describe("Akiro(config)", function () {
 				config = {
 					exec: mockExec
 				};
-				akiro = new _libAkiroJs2["default"](config);
+				akiro = new _akiro2.default(config);
 				akiro.exec.should.eql(mockExec);
 			});
 		});
@@ -161,7 +161,7 @@ describe("Akiro(config)", function () {
 				config = {
 					execSync: mockExecSync
 				};
-				akiro = new _libAkiroJs2["default"](config);
+				akiro = new _akiro2.default(config);
 				akiro.execSync.should.eql(mockExecSync);
 			});
 		});
@@ -178,7 +178,7 @@ describe("Akiro(config)", function () {
 				config = {
 					cacheDirectoryPath: "./.somethingElse/"
 				};
-				akiro = new _libAkiroJs2["default"](config);
+				akiro = new _akiro2.default(config);
 				akiro.cacheDirectoryPath.should.eql(config.cacheDirectoryPath);
 			});
 		});

@@ -4,11 +4,7 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _incognito = require("incognito");
 
@@ -18,7 +14,7 @@ var _conan = require("conan");
 
 var _conan2 = _interopRequireDefault(_conan);
 
-var _packageJson = require("../../package.json");
+var _package2 = require("../../package.json");
 
 var _path = require("path");
 
@@ -28,9 +24,9 @@ var _temp = require("temp");
 
 var _temp2 = _interopRequireDefault(_temp);
 
-var _akiroBuildersNodejsAkiroBuilderJs = require("./akiro/builders/nodejs/akiroBuilder.js");
+var _akiroBuilder = require("./akiro/builders/nodejs/akiroBuilder.js");
 
-var _akiroBuildersNodejsAkiroBuilderJs2 = _interopRequireDefault(_akiroBuildersNodejsAkiroBuilderJs);
+var _akiroBuilder2 = _interopRequireDefault(_akiroBuilder);
 
 var _flowsync = require("flowsync");
 
@@ -50,29 +46,33 @@ var _bauerZip = require("bauer-zip");
 
 var _bauerZip2 = _interopRequireDefault(_bauerZip);
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 var invokeBuilderLambdas = Symbol();
 var createInvokeLambdaTask = Symbol();
 var downloadObjectsFromS3 = Symbol();
 var createGetObjectTask = Symbol();
 var unzipLocalFile = Symbol();
 
-var Akiro = (function () {
+var Akiro = function () {
 	function Akiro() {
 		var config = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
 		_classCallCheck(this, Akiro);
 
-		var _ = (0, _incognito2["default"])(this);
+		var _ = (0, _incognito2.default)(this);
 
 		_.config = config;
 		_.config.region = _.config.region || "us-east-1";
 
-		this.conan = _.config.conan || new _conan2["default"]({ region: _.config.region });
+		this.conan = _.config.conan || new _conan2.default({ region: _.config.region });
 		this.conan.use(_conan.ConanAwsLambdaPlugin);
 
-		this.Async = _.config.Async || _flowsync2["default"];
-		this.AWS = _.config.AWS || _awsSdk2["default"];
-		this.temp = _.config.temp || _temp2["default"];
+		this.Async = _.config.Async || _flowsync2.default;
+		this.AWS = _.config.AWS || _awsSdk2.default;
+		this.temp = _.config.temp || _temp2.default;
 		this.exec = _.config.exec || _child_process.exec;
 		this.execSync = _.config.execSync || _child_process.execSync;
 		this.cacheDirectoryPath = _.config.cacheDirectoryPath || "./.akiro/cache";
@@ -90,10 +90,8 @@ var Akiro = (function () {
 			var lambdaName = "AkiroBuilder";
 			var lambdaRole = iamRoleName;
 			var lambdaFilePath = __dirname + "/akiro/builders/nodejs/akiroBuilder.js";
-			var handlerFilePath = __dirname + "/akiro/builders/nodejs/handler.js";
 
-			var lambda = conan.lambda(lambdaName, handlerFilePath, lambdaRole);
-			lambda.dependencies(lambdaFilePath);
+			var lambda = conan.lambda(lambdaName, lambdaFilePath, lambdaRole).handler("invoke");
 
 			var createBuilderTask = function createBuilderTask(dependencyName, dependencyVersionRange, temporaryDirectoryPath) {
 				return function (done) {
@@ -104,13 +102,13 @@ var Akiro = (function () {
 					};
 
 					var event = {
-						"package": {
+						package: {
 							name: dependencyName,
 							version: dependencyVersionRange
 						}
 					};
 
-					var npmPath = _path2["default"].normalize(__dirname + "/../../node_modules/npm/bin/npm-cli.js");
+					var npmPath = _path2.default.normalize(__dirname + "/../../node_modules/npm/bin/npm-cli.js");
 
 					var context = {
 						exec: _this.exec,
@@ -120,7 +118,7 @@ var Akiro = (function () {
 							done();
 						}
 					};
-					var builder = new _akiroBuildersNodejsAkiroBuilderJs2["default"](event, context);
+					var builder = new _akiroBuilder2.default(event, context);
 					builder.invoke(event, context);
 				};
 			};
@@ -129,14 +127,14 @@ var Akiro = (function () {
 				_this.Async.series([function (done) {
 					var builderDependencyTasks = [];
 
-					for (var dependencyName in _packageJson.builderDependencies) {
-						var dependencyVersionRange = _packageJson.builderDependencies[dependencyName];
+					for (var dependencyName in _package2.builderDependencies) {
+						var dependencyVersionRange = _package2.builderDependencies[dependencyName];
 						builderDependencyTasks.push(createBuilderTask(dependencyName, dependencyVersionRange, temporaryDirectoryPath));
 					}
 
 					_this.Async.series(builderDependencyTasks, done);
 				}], function () {
-					lambda.dependencies(temporaryDirectoryPath + "/node_modules/**/*");
+					lambda.dependencies(temporaryDirectoryPath + "/node_modules/**/*", "/node_modules");
 					conan.deploy(callback);
 				});
 			});
@@ -146,11 +144,11 @@ var Akiro = (function () {
 		value: function _package(packageDetails, outputDirectoryPath, callback) {
 			var _this2 = this;
 
-			var _ = (0, _incognito2["default"])(this);
+			var _ = (0, _incognito2.default)(this);
 			_.lambda = new this.AWS.Lambda({ region: this.config.region });
 			_.s3 = new this.AWS.S3({ region: this.config.region });
 
-			_flowsync2["default"].mapParallel(Object.keys(packageDetails), function (packageName, done) {
+			_flowsync2.default.mapParallel(Object.keys(packageDetails), function (packageName, done) {
 				var packageVersionRange = packageDetails[packageName];
 
 				var command = "npm info " + packageName + "@" + packageVersionRange + " version | tail -n 1";
@@ -165,7 +163,7 @@ var Akiro = (function () {
 
 					var cachedFilePath = _this2.cacheDirectoryPath + "/" + packageName + "-" + packageLatestVersion + ".zip";
 
-					if (_fsExtra2["default"].existsSync(cachedFilePath)) {
+					if (_fsExtra2.default.existsSync(cachedFilePath)) {
 						delete packageDetails[packageName];
 						_this2[unzipLocalFile](cachedFilePath, outputDirectoryPath, done);
 					} else {
@@ -193,13 +191,13 @@ var Akiro = (function () {
 		key: createInvokeLambdaTask,
 		value: function value(packageName, packageVersionRange, context) {
 			return function (done) {
-				var _ = (0, _incognito2["default"])(context);
+				var _ = (0, _incognito2.default)(context);
 				_.lambda.invoke({
 					FunctionName: "AkiroBuilder", /* required */
 					Payload: JSON.stringify({
 						bucket: context.config.bucket,
 						region: context.config.region,
-						"package": {
+						package: {
 							name: packageName,
 							version: packageVersionRange
 						}
@@ -214,7 +212,7 @@ var Akiro = (function () {
 
 			if (!error) {
 				(function () {
-					_fsExtra2["default"].mkdirpSync(_this3.cacheDirectoryPath);
+					_fsExtra2.default.mkdirpSync(_this3.cacheDirectoryPath);
 
 					var getObjectTasks = [];
 
@@ -234,7 +232,7 @@ var Akiro = (function () {
 		value: function value(fileName, outputDirectoryPath, context) {
 			var _this4 = this;
 
-			var _ = (0, _incognito2["default"])(this);
+			var _ = (0, _incognito2.default)(this);
 
 			return function (done) {
 				var objectReadStream = _.s3.getObject({
@@ -243,7 +241,7 @@ var Akiro = (function () {
 				}).createReadStream();
 
 				var objectLocalFileName = context.cacheDirectoryPath + "/" + fileName;
-				var objectWriteStream = _fsExtra2["default"].createWriteStream(objectLocalFileName);
+				var objectWriteStream = _fsExtra2.default.createWriteStream(objectLocalFileName);
 
 				objectWriteStream.on("close", function () {
 					_this4[unzipLocalFile](objectLocalFileName, outputDirectoryPath, done);
@@ -255,17 +253,16 @@ var Akiro = (function () {
 	}, {
 		key: unzipLocalFile,
 		value: function value(localFileName, outputDirectoryPath, callback) {
-			_bauerZip2["default"].unzip(localFileName, outputDirectoryPath, callback);
+			_bauerZip2.default.unzip(localFileName, outputDirectoryPath, callback);
 		}
 	}, {
 		key: "config",
 		get: function get() {
-			return (0, _incognito2["default"])(this).config;
+			return (0, _incognito2.default)(this).config;
 		}
 	}]);
 
 	return Akiro;
-})();
+}();
 
-exports["default"] = Akiro;
-module.exports = exports["default"];
+exports.default = Akiro;
