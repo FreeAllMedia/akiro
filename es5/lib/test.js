@@ -1,34 +1,36 @@
 "use strict";
 
-var _conan = require("conan");
+var _akiro = require("./akiro.js");
 
-var _conan2 = _interopRequireDefault(_conan);
+var _akiro2 = _interopRequireDefault(_akiro);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var conan = new _conan2.default({
-	region: "us-east-1"
-
+var akiro = new _akiro2.default({
+	region: "us-east-1",
+	bucket: "akiro.test"
 }); /* eslint-disable no-console */
 
-//import Akiro from "./akiro.js";
+var iamRoleName = "AWSLambda";
 
-// const akiro = new Akiro({
-// 	region: "us-east-1",
-// 	bucket: "akiro.test"
-// });
-//
-// const iamRoleName = "AWSLambda";
-//
-// console.log("Deploying Akiro.");
-// akiro.initialize(iamRoleName, (error) => {
-// 	if (error) { throw error; }
-// 	console.log("Akiro deployed.");
-// });
+console.log("Deploying Akiro.");
+akiro.initialize(iamRoleName, function (error) {
+	if (error) {
+		throw error;
+	}
+	console.log("Akiro deployed.");
+});
 
 // const outputDirectory = `${__dirname}/../../testOutput/`;
-//
+
 // akiro.package(packageJson.dependencies, outputDirectory, (packageError) => {
 // 	if (packageError) { throw packageError; }
 // 	console.log("Akiro deployed.");
+// });
+
+// import Conan from "conan";
+//
+// const conan = new Conan({
+// 	region: "us-east-1",
+//
 // });

@@ -67,7 +67,10 @@ var Akiro = function () {
 		_.config = config;
 		_.config.region = _.config.region || "us-east-1";
 
-		this.conan = _.config.conan || new _conan2.default({ region: _.config.region });
+		this.conan = _.config.conan || new _conan2.default({
+			region: _.config.region,
+			basePath: _path2.default.normalize(__dirname + "/akiro/builders/nodejs/")
+		});
 		this.conan.use(_conan.ConanAwsLambdaPlugin);
 
 		this.Async = _.config.Async || _flowsync2.default;

@@ -23,7 +23,10 @@ export default class Akiro {
 		_.config = config;
 		_.config.region = _.config.region || "us-east-1";
 
-		this.conan = _.config.conan || new Conan({ region: _.config.region });
+		this.conan = _.config.conan || new Conan({
+			region: _.config.region,
+			basePath: path.normalize(`${__dirname}/akiro/builders/nodejs/`)
+		});
 		this.conan.use(ConanAwsLambdaPlugin);
 
 		this.Async = _.config.Async || Async;

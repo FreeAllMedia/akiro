@@ -4,6 +4,7 @@ import temp from "temp";
 import { exec, execSync } from "child_process";
 import AWS from "aws-sdk";
 import Async from "flowsync";
+import path from "path";
 
 describe("Akiro(config)", () => {
 	let akiro,
@@ -34,9 +35,18 @@ describe("Akiro(config)", () => {
 				akiro.conan.should.eql(conan);
 			});
 		});
+
 		describe("(When akiro.config.conan is NOT set)", () => {
 			it("should set akiro.conan to a new instance of Conan", () => {
 				akiro.conan.should.be.instanceOf(Conan);
+			});
+
+			it("should configure conan to use the supplied akiro region", () => {
+				akiro.conan.config.region.should.eql("us-east-1");
+			});
+
+			it("should configure basepath to use the supplied akiro region", () => {
+				akiro.conan.config.basePath.should.eql(path.normalize(`${__dirname}/../lib/akiro/builders/nodejs/`));
 			});
 		});
 	});

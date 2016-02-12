@@ -22,6 +22,10 @@ var _flowsync = require("flowsync");
 
 var _flowsync2 = _interopRequireDefault(_flowsync);
 
+var _path = require("path");
+
+var _path2 = _interopRequireDefault(_path);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 describe("Akiro(config)", function () {
@@ -52,9 +56,18 @@ describe("Akiro(config)", function () {
 				akiro.conan.should.eql(conan);
 			});
 		});
+
 		describe("(When akiro.config.conan is NOT set)", function () {
 			it("should set akiro.conan to a new instance of Conan", function () {
 				akiro.conan.should.be.instanceOf(_conan2.default);
+			});
+
+			it("should configure conan to use the supplied akiro region", function () {
+				akiro.conan.config.region.should.eql("us-east-1");
+			});
+
+			it("should configure basepath to use the supplied akiro region", function () {
+				akiro.conan.config.basePath.should.eql(_path2.default.normalize(__dirname + "/../lib/akiro/builders/nodejs/"));
 			});
 		});
 	});
