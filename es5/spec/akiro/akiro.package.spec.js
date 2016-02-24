@@ -51,7 +51,6 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", functio
 	    s3ConstructorSpy = undefined;
 
 	beforeEach(function (done) {
-
 		packageDetails = {
 			"async": "1.x.x",
 			"incognito": "0.1.4"
