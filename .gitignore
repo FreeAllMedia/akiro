@@ -28,3 +28,7 @@ node_modules
 
 # lcov file
 lcov.info
+
+.DS_Store
+
+testOutput
