@@ -52,7 +52,7 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", () => {
 				const packageVersion = payloadData.package.version;
 
 				invokeCallback(null, {
-					fileName: `${packageName}-${packageVersion}.zip`
+					Payload: `{ "fileName": "${packageName}-${packageVersion}.zip" }`
 				});
 			})
 		};

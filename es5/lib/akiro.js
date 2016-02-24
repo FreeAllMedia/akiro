@@ -202,7 +202,6 @@ var Akiro = function () {
 		value: function value(packageName, packageVersionRange, context) {
 			return function (done) {
 				var _ = (0, _incognito2.default)(context);
-				console.log("Invoking AkiroBuilder: ", packageName + "@" + packageVersionRange);
 				_.lambda.invoke({
 					FunctionName: "AkiroBuilder", /* required */
 					Payload: JSON.stringify({
@@ -214,7 +213,6 @@ var Akiro = function () {
 						}
 					})
 				}, function (error, data) {
-					console.log("DONE AkiroBuilder: ", packageName + "@" + packageVersionRange);
 					done(error, data);
 				});
 			};
@@ -226,7 +224,6 @@ var Akiro = function () {
 
 			if (!error) {
 				(function () {
-					console.log("No Error in downloadObjectsFromS3");
 					_fsExtra2.default.mkdirpSync(_this3.cacheDirectoryPath);
 
 					var getObjectTasks = [];
@@ -234,7 +231,6 @@ var Akiro = function () {
 					data.forEach(function (returnData) {
 						returnData = JSON.parse(returnData.Payload);
 						var fileName = returnData.fileName;
-						console.log("returnData", returnData);
 						getObjectTasks.push(_this3[createGetObjectTask](fileName, outputDirectoryPath, _this3));
 					});
 
