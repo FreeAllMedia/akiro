@@ -1,34 +1,80 @@
-# Akiro.js [![npm version](https://img.shields.io/npm/v/akiro.svg)](https://www.npmjs.com/package/akiro) [![license type](https://img.shields.io/npm/l/akiro.svg)](https://github.com/FreeAllMedia/akiro.git/blob/master/LICENSE) [![npm downloads](https://img.shields.io/npm/dm/akiro.svg)](https://www.npmjs.com/package/akiro)
+![](./akiro-logo.png)
 
-Certain packages you may want to use in AWS Lambda rely upon compiling native code for the architecture it will be running on. This poses a problem when dependencies are compiled on our local development machines then expected to run on the AWS Lambda architecture.
+# Akiro.js [![npm version](https://img.shields.io/npm/v/akiro.svg)](https://www.npmjs.com/package/akiro) [![license type](https://img.shields.io/npm/l/akiro.svg)](https://github.com/FreeAllMedia/akiro.git/blob/master/LICENSE) ![ECMAScript 2015 Source](https://img.shields.io/badge/Source-ECMAScript%202015-brightgreen.svg) [![npm downloads](https://img.shields.io/npm/dm/akiro.svg)](https://www.npmjs.com/package/akiro)
 
-Akiro.js takes a list of packages and version numbers, invokes a special Lambda function with them that builds each package within the AWS Lambda environment, then zips and delivers them to you or an S3 bucket.
+Akiro.js is an unobtrusive tool for building npm packages that contain native/static code, directly within an `AWS Lambda` function so that they are compiled against the correct architecture.
 
-* [Compatibility & Quality](#compatibility--quality)
-* [How it Works](#how-it-works)
-* [Installation](#installation)
-  * [Configuration](#configuration)
-* [Usage](#usage)
-  * [akiro.initialize([callback])](#akiroinitializecallback)
-  * [akiro.package(packageList, s3BucketName, [options,] [callback])](#akiropackagepackagelist-s3bucketname-options-callback)
-* [Contributing](#we-love-contributors)
+After the packages are built, they can be automatically sent to an S3 bucket or to a local directory. Additionally, there is built in support for local caching so that any specific version of a package is only built once and then re-used to optimize deployment times.
 
-## Compatibility & Quality
+``` javascript
+import Akiro from "./akiro.js";
 
-![ECMAScript 6 & 5](https://img.shields.io/badge/ECMAScript-6%20/%205-red.svg) ![node 0.12.x](https://img.shields.io/badge/node-0.12.x-brightgreen.svg) ![node 0.11.x](https://img.shields.io/badge/node-0.11.x-brightgreen.svg) ![node 0.10.x](https://img.shields.io/badge/node-0.10.x-brightgreen.svg) ![iojs 2.x.x](https://img.shields.io/badge/iojs-2.x.x-brightgreen.svg) ![iojs 1.x.x](https://img.shields.io/badge/iojs-1.x.x-brightgreen.svg)
+const akiro = new Akiro({
+	region: "us-east-1",
+	bucket: "fam-akiro"
+});
+
+const packages = {
+	"archiver": "^0.21.0",
+	"aws-sdk": "^2.2.28",
+	"flowsync": "^0.1.12",
+	"fs-extra": "^0.26.4",
+	"glob": "^6.0.4",
+	"incognito": "^0.1.4",
+	"temp": "^0.8.3",
+	"unzip2": "^0.2.5"
+};
+
+const outputDirectory = `${process.cwd()}/native_modules/`;
+
+akiro.package(packageJson.dependencies, outputDirectory, (packageError) => {
+	if (packageError) { throw packageError; }
+	console.log("Akiro done.");
+});
+
+```
+
+# Compatibility and Quality Monitoring
+
+[![node 5.x.x](https://img.shields.io/badge/node-5.x.x-brightgreen.svg)](https://travis-ci.org/FreeAllMedia/akiro) [![node 4.x.x](https://img.shields.io/badge/node-4.x.x-brightgreen.svg)](https://travis-ci.org/FreeAllMedia/akiro) [![node 3.x.x](https://img.shields.io/badge/node-3.x.x-brightgreen.svg)](https://travis-ci.org/FreeAllMedia/akiro) [![iojs 2.x.x](https://img.shields.io/badge/iojs-2.x.x-brightgreen.svg)](https://travis-ci.org/FreeAllMedia/akiro) [![iojs 1.x.x](https://img.shields.io/badge/iojs-1.x.x-brightgreen.svg)](https://travis-ci.org/FreeAllMedia/akiro) [![node 0.12.x](https://img.shields.io/badge/node-0.12.x-brightgreen.svg)](https://travis-ci.org/FreeAllMedia/akiro) [![node 0.11.x](https://img.shields.io/badge/node-0.11.x-brightgreen.svg)](https://travis-ci.org/FreeAllMedia/akiro) [![node 0.10.x](https://img.shields.io/badge/node-0.10.x-brightgreen.svg)](https://travis-ci.org/FreeAllMedia/akiro)
 
 [![Build Status](https://travis-ci.org/FreeAllMedia/akiro.png?branch=master)](https://travis-ci.org/FreeAllMedia/akiro) [![Dependency Status](https://david-dm.org/FreeAllMedia/akiro.png?theme=shields.io)](https://david-dm.org/FreeAllMedia/akiro?theme=shields.io) [![Dev Dependency Status](https://david-dm.org/FreeAllMedia/akiro/dev-status.svg)](https://david-dm.org/FreeAllMedia/akiro?theme=shields.io#info=devDependencies)
 
 [![Coverage Status](https://coveralls.io/repos/FreeAllMedia/akiro/badge.svg)](https://coveralls.io/r/FreeAllMedia/akiro) [![Code Climate](https://codeclimate.com/github/FreeAllMedia/akiro/badges/gpa.svg)](https://codeclimate.com/github/FreeAllMedia/akiro) [![bitHound Score](https://www.bithound.io/github/FreeAllMedia/akiro/badges/score.svg)](https://www.bithound.io/github/FreeAllMedia/akiro)
 
-# How it Works
+# Table of Contents
+
+* [Compatibility & Quality](#compatibilityquality)
+* [Getting Started](#gettingstarted)
+    * [Installation](#installation)
+    * [Configuration](#configuration)
+* [Method Guide](#methodguide)
+    * [akiro.initialize([callback])](#akiroinitializecallback)
+    * [akiro.package(packageList, [localOutputDirectoryPath,] [callback])](#akiropackagepackagelist-s3bucketname-options-callback)
+* [How to Contribute](#howtocontribute)
+
+# Getting Started
+
+**IMPORTANT:** Akiro requires that `.initialize()` be run first to deploy the `AkiroBuilder` to your account on AWS Lambda. just once prior to any usage of `.package()`. This step deploys Akiro to your account on AWS Lambda.
+
+## Installation
+
+The easiest way to install Akiro is through the node package manager:
+
+``` shell
+$ npm install akiro --save-dev
+```
+
+Alternately, you can also download the latest release from a project's github page.
+
+## Configuration
 
 **1. `akiro.initialize(iamRoleName, [callback])`**
 
 * Creates an AWS Lambda called the `Akiro Packager` on your account using the designated IAM Role.
 * This step only needs to be completed once when Akiro is first used and after upgrading Akiro to a new version.
 
-**2. `akiro.package(bucketName, packageList, [localZipFilePath,] [callback])`**
+**2. `akiro.package(packageList, [localOutputDirectoryPath,] [callback])`**
 
 * Sends a list of package names and their respective version numbers to the `Akiro Packager`.
 * `Akiro Packager` builds all of the designated packages on the AWS Lambda architecture, ensuring full compatibility for packages containing native code such as C, C++, etc.
