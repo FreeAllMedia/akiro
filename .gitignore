@@ -32,3 +32,5 @@ lcov.info
 .DS_Store
 
 testOutput
+
+.akiro
