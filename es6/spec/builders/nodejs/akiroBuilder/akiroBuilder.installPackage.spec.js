@@ -60,7 +60,7 @@ describe("AkiroBuilder(event, context)", () => {
 				fileSystem.copySync(`${__dirname}/../../../fixtures/newPackage.json`, `${temporaryDirectoryPath}/package.json`);
 				execDone();
 			},
-			["npm info .*"]: execDone => {
+			[`node ${mockNpmPath} info .*`]: execDone => {
 				execDone(null, "1.5.0");
 			}
 		});

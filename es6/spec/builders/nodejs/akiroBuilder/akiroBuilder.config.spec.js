@@ -7,6 +7,7 @@ import AWS from "aws-sdk";
 import createMockExec from "../../../helpers/mockExec.js";
 import createMockTemp from "../../../helpers/mockTemp.js";
 import fileSystem from "fs-extra";
+import path from "path";
 
 temp.track();
 
@@ -45,7 +46,7 @@ describe("AkiroBuilder(event, context)", () => {
 			}
 		};
 
-		nodeModulesDirectoryPath = `${__dirname}/../../../../../node_modules`;
+		nodeModulesDirectoryPath = path.normalize(`${__dirname}/../../../../../node_modules`);
 
 		mockNpmPath = `${nodeModulesDirectoryPath}/npm/bin/npm-cli.js`;
 		mockExec = createMockExec({
@@ -54,7 +55,7 @@ describe("AkiroBuilder(event, context)", () => {
 				fileSystem.copySync(`${__dirname}/../../../fixtures/newPackage.json`, `${temporaryDirectoryPath}/package.json`);
 				execDone();
 			},
-			["npm info .*"]: execDone => {
+			[`node ${mockNpmPath} info .*`]: execDone => {
 				execDone(null, "1.5.0");
 			}
 		});
@@ -114,10 +115,10 @@ describe("AkiroBuilder(event, context)", () => {
 			akiroBuilder.npmPath.should.eql(mockNpmPath);
 		});
 
-		it("should be set to the npmPath package if not provided", () => {
+		it("should be set to the base package path if not provided", () => {
 			context.npmPath = undefined;
 			akiroBuilder = new AkiroBuilder(event, context);
-			akiroBuilder.npmPath.should.eql("./node_modules/npm/bin/npm-cli.js");
+			akiroBuilder.npmPath.should.eql(path.normalize(`${__dirname}/../../../../lib/akiro/builders/nodejs/node_modules/npm/bin/npm-cli.js`));
 		});
 	});
 

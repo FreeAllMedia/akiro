@@ -13,7 +13,7 @@ export default class AkiroBuilder {
 		this.exec = context.exec || exec;
 		this.temp = context.temp || temp;
 		this.fileSystem = context.fileSystem || fileSystem;
-		this.npmPath = context.npmPath || `./node_modules/npm/bin/npm-cli.js`;
+		this.npmPath = context.npmPath || `${__dirname}/node_modules/npm/bin/npm-cli.js`;
 	}
 
 	invoke(event, context) {
@@ -33,8 +33,8 @@ export default class AkiroBuilder {
 					`node ${this.npmPath} init -y`
 				];
 				this.exec(commands.join(";"), (initError) => {
-					this.exec(`npm info ${event.package.name} version`, (infoError, stdOut) => {
-						const version = stdOut;
+					this.exec(`node ${this.npmPath} info ${event.package.name} version`, (infoError, stdOut) => {
+						const version = stdOut.replace("\n", "");
 						parameters.version = version;
 						done(initError);
 					});
@@ -53,7 +53,7 @@ export default class AkiroBuilder {
 				const temporaryDirectoryPath = parameters.temporaryDirectoryPath;
 				const commands = [
 					`cd ${temporaryDirectoryPath}`,
-					`node ${this.npmPath} install`
+					`node ${this.npmPath} install --production`
 				];
 				this.exec(commands.join(";"), (error) => {
 					done(error);
@@ -69,7 +69,7 @@ export default class AkiroBuilder {
 						const isDirectory = this.fileSystem.statSync(filePath).isDirectory();
 						if (!isDirectory) {
 							const fileReadStream = this.fileSystem.createReadStream(filePath);
-							const relativeFilePath = path.relative(`${temporaryDirectoryPath}/node_modules/`, filePath);
+							const relativeFilePath = path.relative(`${temporaryDirectoryPath}/node_modules/`, filePath).replace(temporaryDirectoryPath, "");
 							packagesZip.append(fileReadStream, { name: relativeFilePath } );
 						}
 					});

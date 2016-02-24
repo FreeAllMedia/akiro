@@ -14,6 +14,10 @@ var _conan = require("conan");
 
 var _conan2 = _interopRequireDefault(_conan);
 
+var _conanAwsLambda = require("conan-aws-lambda");
+
+var _conanAwsLambda2 = _interopRequireDefault(_conanAwsLambda);
+
 var _package2 = require("../../package.json");
 
 var _path = require("path");
@@ -69,9 +73,9 @@ var Akiro = function () {
 
 		this.conan = _.config.conan || new _conan2.default({
 			region: _.config.region,
-			basePath: _path2.default.normalize(__dirname + "/akiro/builders/nodejs/")
+			basePath: __dirname + "/akiro/builders/nodejs/"
 		});
-		this.conan.use(_conan.ConanAwsLambdaPlugin);
+		this.conan.use(_conanAwsLambda2.default);
 
 		this.Async = _.config.Async || _flowsync2.default;
 		this.AWS = _.config.AWS || _awsSdk2.default;
@@ -92,9 +96,9 @@ var Akiro = function () {
 
 			var lambdaName = "AkiroBuilder";
 			var lambdaRole = iamRoleName;
-			var lambdaFilePath = __dirname + "/akiro/builders/nodejs/akiroBuilder.js";
+			var lambdaFilePath = __dirname + "/akiro/builders/nodejs/handler.js";
 
-			var lambda = conan.lambda(lambdaName, lambdaFilePath, lambdaRole).handler("invoke");
+			var lambda = conan.lambda(lambdaName).filePath(lambdaFilePath).role(lambdaRole).timeout(300).dependencies(__dirname + "/akiro/builders/nodejs/akiroBuilder.js");
 
 			var createBuilderTask = function createBuilderTask(dependencyName, dependencyVersionRange, temporaryDirectoryPath) {
 				return function (done) {
@@ -137,7 +141,10 @@ var Akiro = function () {
 
 					_this.Async.series(builderDependencyTasks, done);
 				}], function () {
-					lambda.dependencies(temporaryDirectoryPath + "/node_modules/**/*", "/node_modules");
+					lambda.dependencies(temporaryDirectoryPath + "/node_modules/**/*", {
+						zipPath: "/node_modules/",
+						basePath: temporaryDirectoryPath + "/node_modules/"
+					});
 					conan.deploy(callback);
 				});
 			});
@@ -195,6 +202,7 @@ var Akiro = function () {
 		value: function value(packageName, packageVersionRange, context) {
 			return function (done) {
 				var _ = (0, _incognito2.default)(context);
+				console.log("Invoking AkiroBuilder: ", packageName + "@" + packageVersionRange);
 				_.lambda.invoke({
 					FunctionName: "AkiroBuilder", /* required */
 					Payload: JSON.stringify({
@@ -205,7 +213,10 @@ var Akiro = function () {
 							version: packageVersionRange
 						}
 					})
-				}, done);
+				}, function (error, data) {
+					console.log("DONE AkiroBuilder: ", packageName + "@" + packageVersionRange);
+					done(error, data);
+				});
 			};
 		}
 	}, {
@@ -215,12 +226,15 @@ var Akiro = function () {
 
 			if (!error) {
 				(function () {
+					console.log("No Error in downloadObjectsFromS3");
 					_fsExtra2.default.mkdirpSync(_this3.cacheDirectoryPath);
 
 					var getObjectTasks = [];
 
 					data.forEach(function (returnData) {
+						returnData = JSON.parse(returnData.Payload);
 						var fileName = returnData.fileName;
+						console.log("returnData", returnData);
 						getObjectTasks.push(_this3[createGetObjectTask](fileName, outputDirectoryPath, _this3));
 					});
 

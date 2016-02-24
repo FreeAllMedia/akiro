@@ -4,7 +4,9 @@ var _akiro = require("../../lib/akiro.js");
 
 var _akiro2 = _interopRequireDefault(_akiro);
 
-var _conan = require("conan");
+var _conanAwsLambda = require("conan-aws-lambda");
+
+var _conanAwsLambda2 = _interopRequireDefault(_conanAwsLambda);
 
 var _mockConan = require("../helpers/mockConan.js");
 
@@ -77,12 +79,12 @@ describe("akiro.initialize(iamRoleName, callback)", function () {
 
 		var rootPath = _path2.default.normalize(__dirname + "/../../../");
 
-		lambdaFilePath = rootPath + "es6/lib/akiro/builders/nodejs/akiroBuilder.js";
-		var npmPath = rootPath + "node_modules/npm/bin/npm-cli.js";
+		lambdaFilePath = _path2.default.normalize(__dirname + "/../../lib/akiro/builders/nodejs/handler.js");
+		var mockNpmPath = rootPath + "node_modules/npm/bin/npm-cli.js";
 
 		var nodeModulesDirectoryPath = rootPath + "/node_modules";
 
-		mockExec = (0, _mockExec2.default)((_createMockExec = {}, _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + npmPath + " install", function undefined(commandDone) {
+		mockExec = (0, _mockExec2.default)((_createMockExec = {}, _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + mockNpmPath + " install", function undefined(commandDone) {
 			_flowsync2.default.series([function (copyDone) {
 				_fsExtra2.default.copy(nodeModulesDirectoryPath + "/async", temporaryDirectoryPath + "/node_modules/async", function (error) {
 					copyDone(error);
@@ -92,10 +94,10 @@ describe("akiro.initialize(iamRoleName, callback)", function () {
 					copyDone(error);
 				});
 			}], commandDone);
-		}), _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + npmPath + " init -y", function undefined(execDone) {
+		}), _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + mockNpmPath + " init -y", function undefined(execDone) {
 			_fsExtra2.default.copySync(__dirname + "/../fixtures/newPackage.json", temporaryDirectoryPath + "/package.json");
 			execDone();
-		}), _defineProperty(_createMockExec, "npm info .*", function npmInfo(execDone) {
+		}), _defineProperty(_createMockExec, "node " + mockNpmPath + " info .*", function undefined(execDone) {
 			execDone(null, "1.5.0");
 		}), _createMockExec));
 
@@ -118,12 +120,12 @@ describe("akiro.initialize(iamRoleName, callback)", function () {
 	});
 
 	it("should use the ConanAwsLambdaPlugin", function () {
-		mockConan.use.calledWith(_conan.ConanAwsLambdaPlugin).should.be.true;
+		mockConan.use.calledWith(_conanAwsLambda2.default).should.be.true;
 	});
 
 	describe("Akiro Lambda", function () {
 		beforeEach(function () {
-			mockConanLambda = mockConan.components.lambda;
+			mockConanLambda = mockConan.components.lambda[0];
 		});
 
 		it("should use the correct name", function () {
@@ -138,8 +140,8 @@ describe("akiro.initialize(iamRoleName, callback)", function () {
 			mockConanLambda.filePath.firstCall.args[0].should.eql(lambdaFilePath);
 		});
 
-		it("should use change the handler to 'invoke'", function () {
-			mockConanLambda.handler.firstCall.args[0].should.eql("invoke");
+		it("should set the timeout to 300 seconds", function () {
+			mockConanLambda.timeout.firstCall.args[0].should.eql(300);
 		});
 
 		it("should use the supplied role", function () {
@@ -155,7 +157,10 @@ describe("akiro.initialize(iamRoleName, callback)", function () {
 		});
 
 		it("should include akiroBuilder and dependencies in the temp directory", function () {
-			var dependencyPaths = [[temporaryDirectoryPath + "/node_modules/**/*", "/node_modules"]];
+			var dependencyPaths = [[_path2.default.normalize(__dirname + "/../../lib/akiro/builders/nodejs/akiroBuilder.js")], [temporaryDirectoryPath + "/node_modules/**/*", {
+				zipPath: "/node_modules/",
+				basePath: temporaryDirectoryPath + "/node_modules/"
+			}]];
 
 			mockConanLambda.dependencies().should.eql(dependencyPaths);
 		});

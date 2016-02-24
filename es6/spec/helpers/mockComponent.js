@@ -3,7 +3,7 @@ import privateData from "incognito";
 
 export default class MockComponent {
 	constructor(...options) {
-		this.components = {};
+		this.components = {all: []};
 
 		this.constructorSpy = sinon.spy();
 		this.constructorSpy(...options);
@@ -11,10 +11,13 @@ export default class MockComponent {
 		this.initialize(...options);
 	}
 
-	component(methodName, ComponentConstructor) {
+	addComponent(methodName, ComponentConstructor) {
+		this.components[methodName] = [];
 		this[methodName] = sinon.spy((...options) => {
-			this.components[methodName] = new ComponentConstructor(...options);
-			return this.components[methodName];
+			const component = new ComponentConstructor(...options);
+			this.components[methodName].push(component);
+			this.components.all.push(component);
+			return component;
 		});
 	}
 

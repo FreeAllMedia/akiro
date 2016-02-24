@@ -3,13 +3,13 @@ import MockComponent from "./mockComponent.js";
 export default class MockConan extends MockComponent {
 	initialize() {
 		this.property("use");
-		this.component("lambda", MockConanLambda);
+		this.addComponent("lambda", MockConanLambda);
 		this.asyncMethod("deploy");
 	}
 }
 
 class MockConanLambda extends MockComponent {
-	initialize(name, filePath, role) {
+	initialize(name) {
 		this.chainedProperties(
 			"name",
 			"filePath",
@@ -28,11 +28,9 @@ class MockConanLambda extends MockComponent {
 			"dependencies"
 		);
 
-		this.component("lambda", MockConanLambda);
+		this.addComponent("lambda", MockConanLambda);
 
 		this.name(name);
-		this.filePath(filePath);
-		this.role(role);
 		this.runtime("nodejs");
 	}
 }

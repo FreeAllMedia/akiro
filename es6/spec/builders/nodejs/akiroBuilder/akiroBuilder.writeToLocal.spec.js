@@ -6,6 +6,7 @@ import createMockTemp from "../../../helpers/mockTemp.js";
 import fileSystem from "fs-extra";
 import unzip from "unzip2";
 import Async from "flowsync";
+import path from "path";
 
 temp.track();
 
@@ -45,7 +46,7 @@ describe("AkiroBuilder(event, context)", () => {
 			}
 		};
 
-		nodeModulesDirectoryPath = `${__dirname}/../../../../../node_modules`;
+		nodeModulesDirectoryPath = path.normalize(`${__dirname}/../../../../../node_modules`);
 
 		mockNpmPath = `${nodeModulesDirectoryPath}/npm/bin/npm-cli.js`;
 		mockExec = createMockExec({
@@ -58,7 +59,7 @@ describe("AkiroBuilder(event, context)", () => {
 				fileSystem.copySync(`${__dirname}/../../../fixtures/newPackage.json`, `${temporaryDirectoryPath}/package.json`);
 				execDone();
 			},
-			["npm info .*"]: execDone => {
+			[`node ${mockNpmPath} info .*`]: execDone => {
 				execDone(null, "1.5.0");
 			}
 		});

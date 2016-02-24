@@ -50,7 +50,7 @@ var AkiroBuilder = function () {
 		this.exec = context.exec || _child_process.exec;
 		this.temp = context.temp || _temp2.default;
 		this.fileSystem = context.fileSystem || _fsExtra2.default;
-		this.npmPath = context.npmPath || "./node_modules/npm/bin/npm-cli.js";
+		this.npmPath = context.npmPath || __dirname + "/node_modules/npm/bin/npm-cli.js";
 	}
 
 	_createClass(AkiroBuilder, [{
@@ -69,8 +69,8 @@ var AkiroBuilder = function () {
 				var temporaryDirectoryPath = parameters.temporaryDirectoryPath;
 				var commands = ["cd " + temporaryDirectoryPath, "node " + _this.npmPath + " init -y"];
 				_this.exec(commands.join(";"), function (initError) {
-					_this.exec("npm info " + event.package.name + " version", function (infoError, stdOut) {
-						var version = stdOut;
+					_this.exec("node " + _this.npmPath + " info " + event.package.name + " version", function (infoError, stdOut) {
+						var version = stdOut.replace("\n", "");
 						parameters.version = version;
 						done(initError);
 					});
@@ -85,7 +85,7 @@ var AkiroBuilder = function () {
 				});
 			}, function (done) {
 				var temporaryDirectoryPath = parameters.temporaryDirectoryPath;
-				var commands = ["cd " + temporaryDirectoryPath, "node " + _this.npmPath + " install"];
+				var commands = ["cd " + temporaryDirectoryPath, "node " + _this.npmPath + " install --production"];
 				_this.exec(commands.join(";"), function (error) {
 					done(error);
 				});
@@ -99,7 +99,7 @@ var AkiroBuilder = function () {
 						var isDirectory = _this.fileSystem.statSync(filePath).isDirectory();
 						if (!isDirectory) {
 							var fileReadStream = _this.fileSystem.createReadStream(filePath);
-							var relativeFilePath = _path2.default.relative(temporaryDirectoryPath + "/node_modules/", filePath);
+							var relativeFilePath = _path2.default.relative(temporaryDirectoryPath + "/node_modules/", filePath).replace(temporaryDirectoryPath, "");
 							packagesZip.append(fileReadStream, { name: relativeFilePath });
 						}
 					});

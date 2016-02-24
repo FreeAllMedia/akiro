@@ -66,7 +66,7 @@ describe("Akiro(config)", function () {
 				akiro.conan.config.region.should.eql("us-east-1");
 			});
 
-			it("should configure basepath to use the supplied akiro region", function () {
+			it("should configure basePath to use the supplied basePath", function () {
 				akiro.conan.config.basePath.should.eql(_path2.default.normalize(__dirname + "/../lib/akiro/builders/nodejs/"));
 			});
 		});

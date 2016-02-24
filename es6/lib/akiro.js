@@ -1,5 +1,6 @@
 import privateData from "incognito";
-import Conan, { ConanAwsLambdaPlugin } from "conan";
+import Conan from "conan";
+import ConanAwsLambdaPlugin from "conan-aws-lambda";
 import { builderDependencies } from "../../package.json";
 import path from "path";
 import temp from "temp";
@@ -25,7 +26,7 @@ export default class Akiro {
 
 		this.conan = _.config.conan || new Conan({
 			region: _.config.region,
-			basePath: path.normalize(`${__dirname}/akiro/builders/nodejs/`)
+			basePath: `${__dirname}/akiro/builders/nodejs/`
 		});
 		this.conan.use(ConanAwsLambdaPlugin);
 
@@ -48,9 +49,14 @@ export default class Akiro {
 
 		const lambdaName = "AkiroBuilder";
 		const lambdaRole = iamRoleName;
-		const lambdaFilePath = __dirname + "/akiro/builders/nodejs/akiroBuilder.js";
+		const lambdaFilePath = `${__dirname}/akiro/builders/nodejs/handler.js`;
 
-		const lambda = conan.lambda(lambdaName, lambdaFilePath, lambdaRole).handler("invoke");
+		const lambda = conan
+			.lambda(lambdaName)
+			.filePath(lambdaFilePath)
+			.role(lambdaRole)
+			.timeout(300)
+			.dependencies(`${__dirname}/akiro/builders/nodejs/akiroBuilder.js`);
 
 		const createBuilderTask = (dependencyName, dependencyVersionRange, temporaryDirectoryPath) => {
 			return (done) => {
@@ -95,7 +101,10 @@ export default class Akiro {
 					this.Async.series(builderDependencyTasks, done);
 				}
 			], () => {
-				lambda.dependencies(`${temporaryDirectoryPath}/node_modules/**/*`, "/node_modules");
+				lambda.dependencies(`${temporaryDirectoryPath}/node_modules/**/*`, {
+					zipPath: "/node_modules/",
+					basePath: `${temporaryDirectoryPath}/node_modules/`
+				});
 				conan.deploy(callback);
 			});
 		});
@@ -158,7 +167,9 @@ export default class Akiro {
 						version: packageVersionRange
 					}
 				})
-			}, done);
+			}, (error, data) => {
+				done(error, data);
+			});
 		};
 	}
 
@@ -169,6 +180,7 @@ export default class Akiro {
 			let getObjectTasks = [];
 
 			data.forEach(returnData => {
+				returnData = JSON.parse(returnData.Payload);
 				const fileName = returnData.fileName;
 				getObjectTasks.push(this[createGetObjectTask](fileName, outputDirectoryPath, this));
 			});

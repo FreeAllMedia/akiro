@@ -34,6 +34,10 @@ var _fsExtra = require("fs-extra");
 
 var _fsExtra2 = _interopRequireDefault(_fsExtra);
 
+var _path = require("path");
+
+var _path2 = _interopRequireDefault(_path);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -77,7 +81,7 @@ describe("AkiroBuilder(event, context)", function () {
 			}
 		};
 
-		nodeModulesDirectoryPath = __dirname + "/../../../../../node_modules";
+		nodeModulesDirectoryPath = _path2.default.normalize(__dirname + "/../../../../../node_modules");
 
 		mockNpmPath = nodeModulesDirectoryPath + "/npm/bin/npm-cli.js";
 		mockExec = (0, _mockExec2.default)((_createMockExec = {}, _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + mockNpmPath + " install", function undefined(execDone) {
@@ -85,7 +89,7 @@ describe("AkiroBuilder(event, context)", function () {
 		}), _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + mockNpmPath + " init -y", function undefined(execDone) {
 			_fsExtra2.default.copySync(__dirname + "/../../../fixtures/newPackage.json", temporaryDirectoryPath + "/package.json");
 			execDone();
-		}), _defineProperty(_createMockExec, "npm info .*", function npmInfo(execDone) {
+		}), _defineProperty(_createMockExec, "node " + mockNpmPath + " info .*", function undefined(execDone) {
 			execDone(null, "1.5.0");
 		}), _createMockExec));
 		mockTemp = (0, _mockTemp2.default)(temporaryDirectoryPath);
@@ -146,10 +150,10 @@ describe("AkiroBuilder(event, context)", function () {
 			akiroBuilder.npmPath.should.eql(mockNpmPath);
 		});
 
-		it("should be set to the npmPath package if not provided", function () {
+		it("should be set to the base package path if not provided", function () {
 			context.npmPath = undefined;
 			akiroBuilder = new _akiroBuilder2.default(event, context);
-			akiroBuilder.npmPath.should.eql("./node_modules/npm/bin/npm-cli.js");
+			akiroBuilder.npmPath.should.eql(_path2.default.normalize(__dirname + "/../../../../lib/akiro/builders/nodejs/node_modules/npm/bin/npm-cli.js"));
 		});
 	});
 
