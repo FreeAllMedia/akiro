@@ -1,12 +1,16 @@
-![](./akiro-logo.png)
+![](./images/akiro-logo.png)
 
 # Akiro.js [![npm version](https://img.shields.io/npm/v/akiro.svg)](https://www.npmjs.com/package/akiro) [![license type](https://img.shields.io/npm/l/akiro.svg)](https://github.com/FreeAllMedia/akiro.git/blob/master/LICENSE) ![ECMAScript 2015 Source](https://img.shields.io/badge/Source-ECMAScript%202015-brightgreen.svg) [![npm downloads](https://img.shields.io/npm/dm/akiro.svg)](https://www.npmjs.com/package/akiro)
 
 Akiro.js is an unobtrusive tool for building npm packages that contain native/static code, directly within an `AWS Lambda` function so that they are compiled against the correct architecture.
 
-After the packages are built, they can be automatically sent to an S3 bucket or to a local directory. Additionally, there is built in support for local caching so that any specific version of a package is only built once and then re-used to optimize deployment times.
+After the packages are built, they are automatically saved to an S3 bucket of your designation, then optionally downloaded and unzipped to a local directory.
+
+There is built-in support for local caching so that any specific version of any package is only built once and then re-used to optimize deployment times.
 
 ``` javascript
+import fileSystem from "fs";
+
 import Akiro from "./akiro.js";
 
 const akiro = new Akiro({
@@ -29,7 +33,7 @@ const outputDirectory = `${process.cwd()}/native_modules/`;
 
 akiro.package(packageJson.dependencies, outputDirectory, (packageError) => {
 	if (packageError) { throw packageError; }
-	console.log("Akiro done.");
+	console.log("Voila!", fileSystem.readDirSync(outputDirectory));
 });
 
 ```
@@ -48,9 +52,9 @@ akiro.package(packageJson.dependencies, outputDirectory, (packageError) => {
 * [Getting Started](#gettingstarted)
     * [Installation](#installation)
     * [Configuration](#configuration)
-* [Method Guide](#methodguide)
-    * [akiro.initialize([callback])](#akiroinitializecallback)
-    * [akiro.package(packageList, [localOutputDirectoryPath,] [callback])](#akiropackagepackagelist-s3bucketname-options-callback)
+* [API Reference](#apireference)
+    * [akiro.initialize()](#akiroinitialize)
+    * [akiro.package()](#akiropackage)
 * [How to Contribute](#howtocontribute)
 
 # Getting Started

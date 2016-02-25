@@ -11,7 +11,7 @@ import path from "path";
 
 temp.track();
 
-describe("AkiroBuilder(event, context)", () => {
+describe("AkiroBuilder(event, context).addDependencies()", () => {
 	let event,
 			context,
 			akiroBuilder,
@@ -37,13 +37,11 @@ describe("AkiroBuilder(event, context)", () => {
 	});
 
 	beforeEach(function (done) {
-
-
 		event = {
 			region: "us-east-1",
 			package: {
 				name: "async",
-				version: packageJson.dependencies.async
+				version: "1.0.0"
 			}
 		};
 
@@ -55,9 +53,6 @@ describe("AkiroBuilder(event, context)", () => {
 			[`cd ${temporaryDirectoryPath};node ${mockNpmPath} init -y`]: execDone => {
 				fileSystem.copySync(`${__dirname}/../../../fixtures/newPackage.json`, `${temporaryDirectoryPath}/package.json`);
 				execDone();
-			},
-			[`node ${mockNpmPath} info .*`]: execDone => {
-				execDone(null, "1.5.0");
 			}
 		});
 		mockTemp = createMockTemp(temporaryDirectoryPath);

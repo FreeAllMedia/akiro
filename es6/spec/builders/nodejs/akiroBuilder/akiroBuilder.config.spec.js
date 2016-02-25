@@ -54,13 +54,11 @@ describe("AkiroBuilder(event, context)", () => {
 			[`cd ${temporaryDirectoryPath};node ${mockNpmPath} init -y`]: execDone => {
 				fileSystem.copySync(`${__dirname}/../../../fixtures/newPackage.json`, `${temporaryDirectoryPath}/package.json`);
 				execDone();
-			},
-			[`node ${mockNpmPath} info .*`]: execDone => {
-				execDone(null, "1.5.0");
 			}
 		});
 		mockTemp = createMockTemp(temporaryDirectoryPath);
 		mockFileSystem = {
+			readFileSync: sinon.spy(fileSystem.readFileSync),
 			writeFile: sinon.spy(fileSystem.writeFile),
 			statSync: sinon.spy(fileSystem.statSync),
 			createReadStream: sinon.spy(fileSystem.createReadStream),
