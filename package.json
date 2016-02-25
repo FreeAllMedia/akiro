@@ -1,7 +1,7 @@
 {
   "generatorVersion": "0.2.21",
   "name": "akiro",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Akiro is Conan's wizard. He will compile your dependent packages on lambda and send you back a zip of them!",
   "main": "index.js",
   "scripts": {
