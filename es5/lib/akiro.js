@@ -46,9 +46,9 @@ var _fsExtra = require("fs-extra");
 
 var _fsExtra2 = _interopRequireDefault(_fsExtra);
 
-var _bauerZip = require("bauer-zip");
+var _decompress = require("decompress");
 
-var _bauerZip2 = _interopRequireDefault(_bauerZip);
+var _decompress2 = _interopRequireDefault(_decompress);
 
 var _util = require("util");
 
@@ -270,7 +270,13 @@ var Akiro = function () {
 						getObjectTasks.push(_this4[createGetObjectTask](fileName, outputDirectoryPath, _this4));
 					});
 
-					_this4.Async.parallel(getObjectTasks, callback);
+					_this4.Async.parallel(getObjectTasks, function (getObjectError, getObjectData) {
+						_this4.debug("get object tasks complete", {
+							getObjectError: getObjectError,
+							getObjectData: getObjectData
+						});
+						callback(getObjectError);
+					});
 				})();
 			} else {
 				callback(error);
@@ -301,9 +307,6 @@ var Akiro = function () {
 
 				objectWriteStream.on("close", function () {
 					_this5.debug("downloaded completed package zip file finished: " + fileName);
-					_this5.debug("unzipping downloaded completed package zip file: " + objectLocalFileName, {
-						outputDirectoryPath: outputDirectoryPath
-					});
 					_this5[unzipLocalFile](objectLocalFileName, outputDirectoryPath, done);
 				});
 
@@ -315,12 +318,18 @@ var Akiro = function () {
 		value: function value(localFileName, outputDirectoryPath, callback) {
 			var _this6 = this;
 
-			_bauerZip2.default.unzip(localFileName, outputDirectoryPath, function () {
+			this.debug("unzipping completed package zip file: " + localFileName, {
+				outputDirectoryPath: outputDirectoryPath
+			});
+
+			var moduleName = _path2.default.basename(localFileName, ".zip").replace(/-\d*\.\d*\.\d*$/, "");
+
+			new _decompress2.default({ mode: "755" }).src(localFileName).dest(outputDirectoryPath + "/" + moduleName).use(_decompress2.default.zip({ strip: 1 })).run(function () {
 				_this6.debug("completed package zip file unzipped", {
 					localFileName: localFileName,
 					outputDirectoryPath: outputDirectoryPath
 				});
-				callback.apply(undefined, arguments);
+				callback();
 			});
 		}
 	}, {

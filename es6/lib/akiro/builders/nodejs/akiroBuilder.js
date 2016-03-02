@@ -17,7 +17,7 @@ export default class AkiroBuilder {
 	}
 
 	status(message) {
-		console.log(message);
+		//console.log(message);
 	}
 
 	invoke(event, context) {
@@ -90,12 +90,6 @@ export default class AkiroBuilder {
 						}
 					});
 					this.status(`Done adding files to package zip.`);
-
-					this.exec(`df`, (dfError, stdout) => {
-						this.status(stdout);
-					});
-
-
 
 					const zipFileWriteStream = this.fileSystem.createWriteStream(`${temporaryDirectoryPath}/package.zip`);
 

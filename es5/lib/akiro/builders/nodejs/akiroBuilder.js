@@ -56,7 +56,7 @@ var AkiroBuilder = function () {
 	_createClass(AkiroBuilder, [{
 		key: "status",
 		value: function status(message) {
-			console.log(message);
+			//console.log(message);
 		}
 	}, {
 		key: "invoke",
@@ -121,10 +121,6 @@ var AkiroBuilder = function () {
 						}
 					});
 					_this.status("Done adding files to package zip.");
-
-					_this.exec("df", function (dfError, stdout) {
-						_this.status(stdout);
-					});
 
 					var zipFileWriteStream = _this.fileSystem.createWriteStream(temporaryDirectoryPath + "/package.zip");
 

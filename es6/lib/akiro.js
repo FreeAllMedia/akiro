@@ -9,7 +9,7 @@ import Async from "flowsync";
 import { exec, execSync } from "child_process";
 import AWS from "aws-sdk";
 import fileSystem from "fs-extra";
-import unzip from "bauer-zip";
+import Decompress from "decompress";
 import util from "util";
 import color from "colors";
 const invokeBuilderLambdas = Symbol();
@@ -212,7 +212,13 @@ export default class Akiro {
 				getObjectTasks.push(this[createGetObjectTask](fileName, outputDirectoryPath, this));
 			});
 
-			this.Async.parallel(getObjectTasks, callback);
+			this.Async.parallel(getObjectTasks, (getObjectError, getObjectData) => {
+				this.debug(`get object tasks complete`, {
+					getObjectError,
+					getObjectData
+				});
+				callback(getObjectError);
+			});
 		} else {
 			callback(error);
 		}
@@ -240,9 +246,6 @@ export default class Akiro {
 			objectWriteStream
 				.on("close", () => {
 					this.debug(`downloaded completed package zip file finished: ${fileName}`);
-					this.debug(`unzipping downloaded completed package zip file: ${objectLocalFileName}`, {
-						outputDirectoryPath
-					});
 					this[unzipLocalFile](objectLocalFileName, outputDirectoryPath, done);
 				});
 
@@ -252,12 +255,22 @@ export default class Akiro {
 	}
 
 	[unzipLocalFile](localFileName, outputDirectoryPath, callback) {
-		unzip.unzip(localFileName, outputDirectoryPath, (...options) => {
-			this.debug("completed package zip file unzipped", {
-				localFileName,
-				outputDirectoryPath
-			});
-			callback(...options);
+		this.debug(`unzipping completed package zip file: ${localFileName}`, {
+			outputDirectoryPath
 		});
+
+		const moduleName = path.basename(localFileName, ".zip").replace(/-\d*\.\d*\.\d*$/, "");
+
+		new Decompress({mode: "755"})
+			.src(localFileName)
+			.dest(`${outputDirectoryPath}/${moduleName}`)
+			.use(Decompress.zip({strip: 1}))
+			.run(() => {
+				this.debug("completed package zip file unzipped", {
+					localFileName,
+					outputDirectoryPath
+				});
+				callback();
+			});
 	}
 }

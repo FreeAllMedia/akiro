@@ -9,13 +9,6 @@ const akiro = new Akiro({
 	debug: 1
 });
 
-// const iamRoleName = "AWSLambda";
-// console.log("Deploying Akiro.");
-// akiro.initialize(iamRoleName, error => {
-// 	if (error) { throw error; }
-// 	console.log("Akiro deployed.");
-// });
-
 const packages = {
 	"flowsync": "^0.1.12",
 	"almaden": "^0.3.1",
@@ -27,5 +20,5 @@ const outputDirectory = `${process.cwd()}/testOutput/`;
 
 akiro.package(packages, outputDirectory, (packageError) => {
 	if (packageError) { throw packageError; }
-	console.log("Voila!", fileSystem.readDirSync(outputDirectory));
+	console.log("Voila!", fileSystem.readdirSync(outputDirectory));
 });
