@@ -9,8 +9,9 @@ import Async from "flowsync";
 import { exec, execSync } from "child_process";
 import AWS from "aws-sdk";
 import fileSystem from "fs-extra";
-import unzip from "bauer-zip";
-
+import Decompress from "decompress";
+import util from "util";
+import color from "colors";
 const invokeBuilderLambdas = Symbol();
 const createInvokeLambdaTask = Symbol();
 const downloadObjectsFromS3 = Symbol();
@@ -37,7 +38,20 @@ export default class Akiro {
 		this.execSync = _.config.execSync || execSync;
 		this.cacheDirectoryPath = _.config.cacheDirectoryPath || "./.akiro/cache";
 
+		this.debug(".constructor", config);
+
 		//this.temp.track();
+	}
+
+	debug(message, parameters) {
+		/* eslint-disable no-console */
+		const debugLevel = privateData(this).config.debug;
+
+		if (debugLevel !== undefined) {
+			let consoleMessage;
+			consoleMessage = `${color.red(message)}\n${util.inspect(parameters, true, debugLevel, true)}`;
+			console.error(consoleMessage);
+		}
 	}
 
 	get config() {
@@ -56,6 +70,7 @@ export default class Akiro {
 			.filePath(lambdaFilePath)
 			.role(lambdaRole)
 			.timeout(300)
+			.memorySize(512)
 			.dependencies(`${__dirname}/akiro/builders/nodejs/akiroBuilder.js`);
 
 		const createBuilderTask = (dependencyName, dependencyVersionRange, temporaryDirectoryPath) => {
@@ -111,6 +126,11 @@ export default class Akiro {
 	}
 
 	package(packageDetails, outputDirectoryPath, callback) {
+		this.debug(".package()", {
+			packageDetails,
+			outputDirectoryPath
+		});
+
 		const _ = privateData(this);
 		_.lambda = new this.AWS.Lambda({ region: this.config.region });
 		_.s3 = new this.AWS.S3({ region: this.config.region });
@@ -131,9 +151,11 @@ export default class Akiro {
 				const cachedFilePath = `${this.cacheDirectoryPath}/${packageName}-${packageLatestVersion}.zip`;
 
 				if (fileSystem.existsSync(cachedFilePath)) {
+					this.debug(`cached package found: ${packageName}@${packageLatestVersion}`);
 					delete packageDetails[packageName];
 					this[unzipLocalFile](cachedFilePath, outputDirectoryPath, done);
 				} else {
+					this.debug(`cached package NOT found: ${packageName}@${packageLatestVersion}`);
 					packageDetails[packageName] = packageLatestVersion;
 					done();
 				}
@@ -157,17 +179,21 @@ export default class Akiro {
 	[createInvokeLambdaTask](packageName, packageVersionRange, context) {
 		return done => {
 			const _ = privateData(context);
+			const payload = {
+				bucket: context.config.bucket,
+				region: context.config.region,
+				package: {
+					name: packageName,
+					version: packageVersionRange
+				}
+			};
+
+			this.debug(`invoke AkiroBuilder: ${packageName}@${packageVersionRange}`, payload);
 			_.lambda.invoke({
 				FunctionName: "AkiroBuilder", /* required */
-				Payload: JSON.stringify({
-					bucket: context.config.bucket,
-					region: context.config.region,
-					package: {
-						name: packageName,
-						version: packageVersionRange
-					}
-				})
+				Payload: JSON.stringify(payload)
 			}, (error, data) => {
+				this.debug(`invoke AkiroBuilder complete: ${packageName}@${packageVersionRange}`, data);
 				done(error, data);
 			});
 		};
@@ -181,11 +207,18 @@ export default class Akiro {
 
 			data.forEach(returnData => {
 				returnData = JSON.parse(returnData.Payload);
+				this.debug(`parsed returnData`, returnData);
 				const fileName = returnData.fileName;
 				getObjectTasks.push(this[createGetObjectTask](fileName, outputDirectoryPath, this));
 			});
 
-			this.Async.parallel(getObjectTasks, callback);
+			this.Async.parallel(getObjectTasks, (getObjectError, getObjectData) => {
+				this.debug(`get object tasks complete`, {
+					getObjectError,
+					getObjectData
+				});
+				callback(getObjectError);
+			});
 		} else {
 			callback(error);
 		}
@@ -195,6 +228,8 @@ export default class Akiro {
 		const _ = privateData(this);
 
 		return done => {
+			this.debug(`downloading completed package zip file: ${fileName}`);
+
 			const objectReadStream = _.s3.getObject({
 				Bucket: context.config.bucket,
 				Key: fileName
@@ -203,8 +238,14 @@ export default class Akiro {
 			const objectLocalFileName = `${context.cacheDirectoryPath}/${fileName}`;
 			const objectWriteStream = fileSystem.createWriteStream(objectLocalFileName);
 
+			// objectWriteStream
+			// 	.on("error", error => {
+			// 		this.debug("ERROR downloading completed package zip file", error);
+			// 	});
+
 			objectWriteStream
 				.on("close", () => {
+					this.debug(`downloaded completed package zip file finished: ${fileName}`);
 					this[unzipLocalFile](objectLocalFileName, outputDirectoryPath, done);
 				});
 
@@ -214,6 +255,22 @@ export default class Akiro {
 	}
 
 	[unzipLocalFile](localFileName, outputDirectoryPath, callback) {
-		unzip.unzip(localFileName, outputDirectoryPath, callback);
+		this.debug(`unzipping completed package zip file: ${localFileName}`, {
+			outputDirectoryPath
+		});
+
+		const moduleName = path.basename(localFileName, ".zip").replace(/-\d*\.\d*\.\d*$/, "");
+
+		new Decompress({mode: "755"})
+			.src(localFileName)
+			.dest(`${outputDirectoryPath}/${moduleName}`)
+			.use(Decompress.zip({strip: 1}))
+			.run(() => {
+				this.debug("completed package zip file unzipped", {
+					localFileName,
+					outputDirectoryPath
+				});
+				callback();
+			});
 	}
 }

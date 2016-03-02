@@ -4,7 +4,7 @@ var _fs = require("fs");
 
 var _fs2 = _interopRequireDefault(_fs);
 
-var _akiro = require("./akiro.js");
+var _akiro = require("../akiro.js");
 
 var _akiro2 = _interopRequireDefault(_akiro);
 
@@ -17,13 +17,6 @@ var akiro = new _akiro2.default({
 	bucket: "fam-akiro",
 	debug: 1
 });
-
-// const iamRoleName = "AWSLambda";
-// console.log("Deploying Akiro.");
-// akiro.initialize(iamRoleName, error => {
-// 	if (error) { throw error; }
-// 	console.log("Akiro deployed.");
-// });
 
 var packages = {
 	"flowsync": "^0.1.12",
@@ -38,5 +31,5 @@ akiro.package(packages, outputDirectory, function (packageError) {
 	if (packageError) {
 		throw packageError;
 	}
-	console.log("Voila!", _fs2.default.readDirSync(outputDirectory));
+	console.log("Voila!", _fs2.default.readdirSync(outputDirectory));
 });

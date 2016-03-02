@@ -56,9 +56,6 @@ describe("AkiroBuilder(event, context)", () => {
 			[`cd ${temporaryDirectoryPath};node ${mockNpmPath} init -y`]: execDone => {
 				fileSystem.copySync(`${__dirname}/../../../fixtures/newPackage.json`, `${temporaryDirectoryPath}/package.json`);
 				execDone();
-			},
-			[`node ${mockNpmPath} info .*`]: execDone => {
-				execDone(null, "1.5.0");
 			}
 		});
 		mockTemp = createMockTemp(temporaryDirectoryPath);

@@ -94,8 +94,6 @@ describe("AkiroBuilder(event, context)", function () {
 		}), _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + mockNpmPath + " init -y", function undefined(execDone) {
 			_fsExtra2.default.copySync(__dirname + "/../../../fixtures/newPackage.json", temporaryDirectoryPath + "/package.json");
 			execDone();
-		}), _defineProperty(_createMockExec, "node " + mockNpmPath + " info .*", function undefined(execDone) {
-			execDone(null, "1.5.0");
 		}), _createMockExec));
 		mockTemp = (0, _mockTemp2.default)(temporaryDirectoryPath);
 

@@ -54,6 +54,11 @@ var AkiroBuilder = function () {
 	}
 
 	_createClass(AkiroBuilder, [{
+		key: "status",
+		value: function status(message) {
+			//console.log(message);
+		}
+	}, {
 		key: "invoke",
 		value: function invoke(event, context) {
 			var _this = this;
@@ -61,32 +66,38 @@ var AkiroBuilder = function () {
 			var parameters = {};
 
 			_flowsync2.default.series([function (done) {
+				_this.status("Creating temporary directory");
 				_this.temp.mkdir("akiroBuilder", function (error, temporaryDirectoryPath) {
+					_this.status("Temporary directory created: " + temporaryDirectoryPath);
 					parameters.temporaryDirectoryPath = temporaryDirectoryPath;
 					done(error);
 				});
 			}, function (done) {
+				_this.status("Creating blank package.json file");
 				var temporaryDirectoryPath = parameters.temporaryDirectoryPath;
 				var commands = ["cd " + temporaryDirectoryPath, "node " + _this.npmPath + " init -y"];
 				_this.exec(commands.join(";"), function (initError) {
-					_this.exec("node " + _this.npmPath + " info " + event.package.name + " version", function (infoError, stdOut) {
-						var version = stdOut.replace("\n", "");
-						parameters.version = version;
-						done(initError);
-					});
+					_this.status("Blank package.json file created.");
+					done(initError);
 				});
 			}, function (done) {
+				_this.status("Adding dependencies to package.json");
 				var temporaryDirectoryPath = parameters.temporaryDirectoryPath;
 				var packageJsonFilePath = temporaryDirectoryPath + "/package.json";
 				var packageJson = require(packageJsonFilePath);
+				packageJson.description = "Temporary AkiroBuilder package.json for generation.";
+				packageJson.repository = "https://this.doesntreallyexist.com/something.git";
 				packageJson.dependencies = _defineProperty({}, event.package.name, event.package.version);
 				_this.fileSystem.writeFile(packageJsonFilePath, JSON.stringify(packageJson), function (error) {
+					_this.status("Dependencies added to package.json");
 					done(error);
 				});
 			}, function (done) {
+				_this.status("Installing dependencies");
 				var temporaryDirectoryPath = parameters.temporaryDirectoryPath;
 				var commands = ["cd " + temporaryDirectoryPath, "node " + _this.npmPath + " install --production"];
-				_this.exec(commands.join(";"), function (error) {
+				_this.exec(commands.join(";"), function (error, stdout) {
+					_this.status("Dependencies installed: " + stdout);
 					done(error);
 				});
 			}, function (done) {
@@ -94,44 +105,61 @@ var AkiroBuilder = function () {
 				var packagesZip = (0, _archiver2.default)("zip", {});
 				var nodeModulesGlob = temporaryDirectoryPath + "/node_modules/**/*";
 
+				_this.status("Adding files to package zip: " + nodeModulesGlob);
+
 				(0, _glob2.default)(nodeModulesGlob, { dot: true }, function (error, filePaths) {
+					_this.status("Number of files found with glob: " + filePaths.length);
 					filePaths.forEach(function (filePath) {
 						var isDirectory = _this.fileSystem.statSync(filePath).isDirectory();
 						if (!isDirectory) {
-							var fileReadStream = _this.fileSystem.createReadStream(filePath);
+							var fileBuffer = _this.fileSystem.readFileSync(filePath);
+
+							//const fileReadStream = this.fileSystem.createReadStream(filePath);
 							var relativeFilePath = _path2.default.relative(temporaryDirectoryPath + "/node_modules/", filePath).replace(temporaryDirectoryPath, "");
-							packagesZip.append(fileReadStream, { name: relativeFilePath });
+							//this.status(`Adding "${filePath}" as "${relativeFilePath}"`);
+							packagesZip.append(fileBuffer, { name: relativeFilePath });
 						}
 					});
+					_this.status("Done adding files to package zip.");
 
 					var zipFileWriteStream = _this.fileSystem.createWriteStream(temporaryDirectoryPath + "/package.zip");
 
 					zipFileWriteStream.on("close", function () {
+						_this.status("Finished saving package zip");
 						done(null);
 					});
+
 					packagesZip.pipe(zipFileWriteStream);
 					packagesZip.finalize();
 				});
 			}, function (done) {
 				if (event.region && event.bucket) {
-					var temporaryDirectoryPath = parameters.temporaryDirectoryPath;
-					var version = parameters.version;
-					var s3 = new _this.AWS.S3({ region: event.region });
+					(function () {
+						var temporaryDirectoryPath = parameters.temporaryDirectoryPath;
+						var version = event.package.version;
+						var s3 = new _this.AWS.S3({ region: event.region });
 
-					var packageZipFilePath = temporaryDirectoryPath + "/package.zip";
+						var packageZipFilePath = temporaryDirectoryPath + "/package.zip";
 
-					var packageZipReadBuffer = _this.fileSystem.readFileSync(packageZipFilePath);
+						var packageZipReadBuffer = _this.fileSystem.readFileSync(packageZipFilePath);
 
-					var fileName = event.package.name + "-" + version + ".zip";
+						var fileName = event.package.name + "-" + version + ".zip";
 
-					parameters.fileName = fileName;
+						parameters.fileName = fileName;
 
-					s3.putObject({
-						Bucket: event.bucket,
-						Key: fileName,
-						Body: packageZipReadBuffer
-					}, done);
+						_this.status("Saving package zip to S3 as: " + event.bucket + "/" + fileName);
+
+						s3.putObject({
+							Bucket: event.bucket,
+							Key: fileName,
+							Body: packageZipReadBuffer
+						}, function () {
+							_this.status("Finished saving package zip to S3 as: " + event.bucket + "/" + fileName);
+							done.apply(undefined, arguments);
+						});
+					})();
 				} else {
+					_this.status("Region or Bucket not set: " + event.region + " - " + event.bucket);
 					done();
 				}
 			}, function (done) {
@@ -140,17 +168,22 @@ var AkiroBuilder = function () {
 					var packageZipFilePath = temporaryDirectoryPath + "/package.zip";
 					_fsExtra2.default.copy(packageZipFilePath, context.localFilePath, done);
 				} else {
+					_this.status("No local file path set.");
 					done();
 				}
 			}], function (error) {
 				if (error) {
+					_this.status("There was an error! " + error);
 					context.fail(error);
 				} else {
+					_this.status("SUCCESS! " + parameters.fileName);
 					context.succeed({
 						fileName: parameters.fileName
 					});
 				}
 			});
+
+			this.status("End of .invoke()");
 		}
 	}]);
 

@@ -46,7 +46,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 _temp2.default.track();
 
-describe("AkiroBuilder(event, context)", function () {
+describe("AkiroBuilder(event, context).addDependencies()", function () {
 	var event = undefined,
 	    context = undefined,
 	    akiroBuilder = undefined,
@@ -76,7 +76,7 @@ describe("AkiroBuilder(event, context)", function () {
 			region: "us-east-1",
 			package: {
 				name: "async",
-				version: _package2.default.dependencies.async
+				version: "1.0.0"
 			}
 		};
 
@@ -88,8 +88,6 @@ describe("AkiroBuilder(event, context)", function () {
 		}), _defineProperty(_createMockExec, "cd " + temporaryDirectoryPath + ";node " + mockNpmPath + " init -y", function undefined(execDone) {
 			_fsExtra2.default.copySync(__dirname + "/../../../fixtures/newPackage.json", temporaryDirectoryPath + "/package.json");
 			execDone();
-		}), _defineProperty(_createMockExec, "node " + mockNpmPath + " info .*", function undefined(execDone) {
-			execDone(null, "1.5.0");
 		}), _createMockExec));
 		mockTemp = (0, _mockTemp2.default)(temporaryDirectoryPath);
 
