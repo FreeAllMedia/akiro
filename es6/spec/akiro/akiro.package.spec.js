@@ -35,7 +35,7 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", () => {
 			"incognito": "0.1.4"
 		};
 
-		outputDirectoryPath = path.normalize(`${__dirname}/../../../temp`); //temp.mkdirSync("akiro.output");
+		outputDirectoryPath = `${temp.mkdirSync("akiro.output")}/some/deep/dir`;
 		cacheDirectoryPath = `${temp.mkdirSync("akiro.cache")}`;
 
 		lambdaConstructorSpy = sinon.spy();
