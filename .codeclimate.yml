@@ -1,4 +1,11 @@
-languages:
-  JavaScript: true
+engines:
+  eslint:
+    enabled: true
+ratings:
+  paths:
+  - es6/**
+  - es6/lib/**
+  - es6/spec/**
 exclude_paths:
-  - es5/*
+- es5/**/*
+- es6/spec/fixtures/**/*
