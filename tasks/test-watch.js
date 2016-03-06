@@ -1,11 +1,8 @@
 import gulp from "gulp";
 import paths from "../paths.json";
 
-gulp.task("test-watch", ["suppress-errors", "test-local"], () => {
+gulp.task("test-watch", ["suppress-errors", "test-es6"], () => {
 	gulp.watch([
-		paths.source.lib,
-		paths.source.spec,
-		paths.source.specAssets,
-		paths.source.libAssets
-	], ["test-local"]);
+		paths.source.all
+	], ["test-es6"]);
 });

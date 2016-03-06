@@ -7,7 +7,6 @@ import createMockExec from "../../../helpers/mockExec.js";
 import createMockTemp from "../../../helpers/mockTemp.js";
 import glob from "glob";
 import unzip from "unzip2";
-import difference from "array-difference";
 import path from "path";
 
 temp.track();
@@ -118,7 +117,7 @@ describe("AkiroBuilder(event, context)", () => {
 				filePaths.push(entry.path);
 			})
 			.on("close", () => {
-				difference(expectedFilePaths, filePaths).should.eql([]);
+				filePaths.should.have.members(expectedFilePaths);
 				done();
 			});
 	});

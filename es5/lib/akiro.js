@@ -104,7 +104,7 @@ var Akiro = function () {
 			var debugLevel = (0, _incognito2.default)(this).config.debug;
 
 			if (debugLevel !== undefined) {
-				var consoleMessage = undefined;
+				var consoleMessage = void 0;
 				consoleMessage = _colors2.default.red(message) + "\n" + _util2.default.inspect(parameters, true, debugLevel, true);
 				console.error(consoleMessage);
 			}
@@ -191,7 +191,7 @@ var Akiro = function () {
 				var command = "npm info " + packageName + "@" + packageVersionRange + " version | tail -n 1";
 
 				_this2.exec(command, function (error, stdout) {
-					var packageLatestVersion = undefined;
+					var packageLatestVersion = void 0;
 					if (stdout.indexOf("@") === -1) {
 						packageLatestVersion = stdout.replace("\n", "");
 					} else {
