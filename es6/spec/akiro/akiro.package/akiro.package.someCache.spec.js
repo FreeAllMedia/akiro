@@ -117,6 +117,10 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", () => {
 		akiro.package(packageDetails, outputDirectoryPath, done);
 	});
 
+	afterEach((done) => {
+		temp.cleanup(done);
+	});
+
 	describe("(When some local cached versions are available)", () => {
 		it("should not invoke the package lambda for the cached versions", () => {
 			const expectedParameters = {

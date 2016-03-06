@@ -51,25 +51,28 @@
     "unzip2": "^0.2.5"
   },
   "devDependencies": {
-    "array-difference": "0.0.1",
-    "babel": "^6.5.1",
+		"babel": "^6.5.1",
     "babel-core": "^6.5.1",
-    "babel-eslint": "^4.1.8",
+    "babel-eslint": "^5.0.0",
     "babel-preset-es2015": "^6.5.0",
     "chai": "^3.0.0",
+    "compare-version": "^0.1.2",
     "coveralls": "^2.11.2",
-    "eslint": "^0.24.0",
-    "glob": "^6.0.3",
+    "eslint": "^2.2.0",
     "gulp": "^3.9.0",
     "gulp-babel": "^6.1.2",
-    "gulp-babel-istanbul": "^0.11.0",
+    "gulp-babel-istanbul": "^1.0.0",
+    "gulp-filter": "^4.0.0",
+    "gulp-if": "^2.0.0",
+    "gulp-ignore": "^2.0.1",
+    "gulp-istanbul": "^0.10.0",
     "gulp-mocha": "^2.1.3",
     "gulp-util": "^3.0.6",
-    "karma-babel-preprocessor": "^6.0.1",
+    "json-stable-stringify": "^1.0.1",
     "mocha": "^2.2.5",
-    "rewire": "^2.5.1",
+    "run-sequence": "^1.1.5",
     "sinon": "^1.17.2",
-    "superstack": "0.0.4",
-    "webpack": "^1.12.14"
+    "stream-buffers": "^3.0.0",
+    "superstack": "0.0.4"
   }
 }

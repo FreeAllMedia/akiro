@@ -114,6 +114,10 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", () => {
 		});
 	});
 
+	afterEach((done) => {
+		temp.cleanup(done);
+	});
+
 	describe("(When an Akiro Builder Lambda invoke fails)", () => {
 		it("should return the error", () => {
 			error.should.be.instanceOf(Error);

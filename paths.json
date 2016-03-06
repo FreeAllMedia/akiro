@@ -1,22 +1,24 @@
 {
 	"source": {
-		"lib": "./es6/lib/**/*.js",
-		"spec": "./es6/spec/**/*.spec.js",
-		"specAssets": [
-			"./es6/spec/**/*.json"
+		"all": "./es6/**/*.*",
+		"lib": [
+			"./es6/lib/**/*.js",
+			"./es6/*.js"
 		],
-		"libAssets": [
-			"./es6/lib/**/*.json"
-		]
+		"spec": "./es6/spec/**/*.js"
 	},
 
 	"build": {
 		"directories": {
+			"es5": "./es5",
 			"lib": "./es5/lib",
 			"spec": "./es5/spec"
 		},
 		"lib": "./es5/lib/**/*.js",
-		"spec": "./es5/**/*.spec.js",
-		"sourceSpec": "./es6/**/*.spec.js"
+		"spec": "./es5/spec/**/*.spec.js",
+		"sourceSpec": [
+			"./es6/spec/**/*.spec.js",
+			"!./es6/spec/fixtures/**/*.spec.js"
+		]
 	}
 }

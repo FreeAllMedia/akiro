@@ -118,6 +118,10 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", () => {
 		akiro.package(packageDetails, outputDirectoryPath, callback);
 	});
 
+	afterEach((done) => {
+		temp.cleanup(done);
+	});
+
 	it("should instantiate Lambda with the designated region", () => {
 		lambdaConstructorSpy.calledWith({
 			region: config.region

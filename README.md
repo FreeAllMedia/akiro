@@ -91,9 +91,7 @@ akiro.initialize(iamRoleName, error => {
 
 # Building Packages
 
-After `Akiro` is configured and initialized the `akiro.package()` becomes available to build packages on the `AkiroBuilder`.
-
-**Notice:** Akiro expects to be given specific version numbers for packages. It won't know what to do with ranges such as `^1.2.4`. You must use a specific version number like: `1.2.4`.
+After `Akiro` is configured and initialized the `akiro.package()` method becomes available for everybody in the orignanization to build packages on the `AkiroBuilder`.
 
 ## akiro.package(packageList, outputDirectory, callback)
 
