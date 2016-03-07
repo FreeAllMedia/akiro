@@ -1,7 +1,7 @@
 {
   "generatorVersion": "0.2.21",
   "name": "akiro",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Magically compile NPM packages with native extensions for AWS Lambda.",
   "main": "index.js",
   "scripts": {
