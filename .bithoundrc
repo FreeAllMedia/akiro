@@ -1,5 +1,6 @@
 {
   "ignore": [
-    "es5/**/*.js"
+    "es5/**/*.js",
+		"es6/spec/fixtures/**/*"
   ]
 }
