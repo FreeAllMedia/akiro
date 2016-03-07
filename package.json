@@ -39,7 +39,7 @@
     "color": "^0.11.1",
     "colors": "^1.1.2",
     "conan": "^0.0.24",
-		"conan-aws-lambda": "^0.0.11",
+    "conan-aws-lambda": "^0.0.11",
     "decompress": "^3.0.0",
     "flowsync": "^0.1.12",
     "fs-extra": "^0.26.4",
@@ -50,7 +50,7 @@
     "unzip2": "^0.2.5"
   },
   "devDependencies": {
-		"babel": "^6.5.1",
+    "babel": "^6.5.1",
     "babel-core": "^6.5.1",
     "babel-eslint": "^5.0.0",
     "babel-preset-es2015": "^6.5.0",
