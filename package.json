@@ -1,8 +1,8 @@
 {
   "generatorVersion": "0.2.21",
   "name": "akiro",
-  "version": "0.0.7",
-  "description": "Magically compile static NPM packages for AWS Lambda.",
+  "version": "0.0.8",
+  "description": "Magically compile NPM packages with native extensions for AWS Lambda.",
   "main": "index.js",
   "scripts": {
     "test": "gulp test"
@@ -12,7 +12,12 @@
     "url": "git+https://github.com/FreeAllMedia/akiro.git"
   },
   "keywords": [
-    "akiro"
+    "akiro",
+		"aws",
+		"lambda",
+		"npm",
+		"native",
+		"extensions"
   ],
   "author": "Free All Media, LLC",
   "contributors": [],
