@@ -20,3 +20,7 @@ after_success:
 addons:
   code_climate:
     repo_token: 18c3ab76d6a7293eb6538ebc315dfea5170289a57017b8857dc0b89012d5ff40
+branches:
+  only:
+    - master
+    - develop
