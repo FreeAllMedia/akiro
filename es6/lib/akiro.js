@@ -6,7 +6,7 @@ import path from "path";
 import temp from "temp";
 import AkiroBuilder from "./akiro/builders/nodejs/akiroBuilder.js";
 import Async from "flowsync";
-import { exec, execSync } from "child_process";
+import { exec } from "child_process";
 import AWS from "aws-sdk";
 import fileSystem from "fs-extra";
 import Decompress from "decompress";
@@ -35,7 +35,6 @@ export default class Akiro {
 		this.AWS = _.config.AWS || AWS;
 		this.temp = _.config.temp || temp;
 		this.exec = _.config.exec || exec;
-		this.execSync = _.config.execSync || execSync;
 		this.cacheDirectoryPath = _.config.cacheDirectoryPath || "./.akiro/cache";
 
 		this.debug(".constructor", config);
