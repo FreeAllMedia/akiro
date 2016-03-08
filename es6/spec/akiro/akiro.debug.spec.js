@@ -4,7 +4,9 @@ describe("Akiro(config)", () => {
 	let akiro,
 			config;
 
-	beforeEach(() => {
+	beforeEach(function () {
+		this.timeout(10000);
+
 		config = {
 			debug: true
 		};

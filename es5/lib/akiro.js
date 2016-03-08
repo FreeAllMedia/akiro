@@ -89,7 +89,6 @@ var Akiro = function () {
 		this.AWS = _.config.AWS || _awsSdk2.default;
 		this.temp = _.config.temp || _temp2.default;
 		this.exec = _.config.exec || _child_process.exec;
-		this.execSync = _.config.execSync || _child_process.execSync;
 		this.cacheDirectoryPath = _.config.cacheDirectoryPath || "./.akiro/cache";
 
 		this.debug(".constructor", config);

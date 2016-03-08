@@ -29,6 +29,7 @@ describe("akiro.package(packageDetails, outputDirectoryPath, callback)", () => {
 			s3ConstructorSpy;
 
 	beforeEach(function (done) {
+		this.timeout(10000);
 
 		packageDetails = {
 			"async": "1.x.x",

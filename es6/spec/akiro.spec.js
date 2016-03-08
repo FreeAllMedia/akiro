@@ -146,24 +146,6 @@ describe("Akiro(config)", () => {
 		});
 	});
 
-	describe("akiro.execSync", () => {
-		describe("(When akiro.config.execSync is set)", () => {
-			it("should set akiro.execSync to akiro.config.execSync", () => {
-				const mockExecSync = {};
-				config = {
-					execSync: mockExecSync
-				};
-				akiro = new Akiro(config);
-				akiro.execSync.should.eql(mockExecSync);
-			});
-		});
-		describe("(When akiro.config.execSync is NOT set)", () => {
-			it("should set akiro.execSync to the execSync package", () => {
-				akiro.execSync.should.eql(execSync);
-			});
-		});
-	});
-
 	describe("akiro.cacheDirectoryPath", () => {
 		describe("(When akiro.config.cacheDirectoryPath is set)", () => {
 			it("should set akiro.cacheDirectoryPath to akiro.config.cacheDirectoryPath", () => {
