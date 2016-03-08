@@ -206,13 +206,13 @@ export default class Akiro {
 
 			data.forEach(returnData => {
 				returnData = JSON.parse(returnData.Payload);
-				this.debug(`parsed returnData`, returnData);
+				this.debug("parsed returnData", returnData);
 				const fileName = returnData.fileName;
 				getObjectTasks.push(this[createGetObjectTask](fileName, outputDirectoryPath, this));
 			});
 
 			this.Async.parallel(getObjectTasks, (getObjectError, getObjectData) => {
-				this.debug(`get object tasks complete`, {
+				this.debug("get object tasks complete", {
 					getObjectError,
 					getObjectData
 				});
