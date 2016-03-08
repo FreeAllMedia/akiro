@@ -27,9 +27,7 @@ describe("akiro.initialize(iamRoleName, callback)", () => {
 			mockTemp,
 			mockExec;
 
-	beforeEach(function (done) {
-		this.timeout(10000);
-
+	beforeEach(done => {
 		temp.mkdir("akiroBuilder", (error, newTemporaryDirectoryPath) => {
 			temporaryDirectoryPath = newTemporaryDirectoryPath;
 			done();
@@ -41,6 +39,8 @@ describe("akiro.initialize(iamRoleName, callback)", () => {
 	});
 
 	beforeEach(function (done) {
+		this.timeout(10000);
+		
 		lambdaName = "AkiroBuilder";
 		lambdaRole = "AkiroLambda";
 

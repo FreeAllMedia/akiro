@@ -19,7 +19,7 @@ const createGetObjectTask = Symbol();
 const unzipLocalFile = Symbol();
 
 export default class Akiro {
-	constructor(config={}) {
+	constructor(config = {}) {
 		const _ = privateData(this);
 
 		_.config = config;
