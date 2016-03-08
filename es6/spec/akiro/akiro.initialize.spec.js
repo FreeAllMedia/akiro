@@ -27,7 +27,9 @@ describe("akiro.initialize(iamRoleName, callback)", () => {
 			mockTemp,
 			mockExec;
 
-	beforeEach((done) => {
+	beforeEach(function (done) {
+		this.timeout(10000);
+
 		temp.mkdir("akiroBuilder", (error, newTemporaryDirectoryPath) => {
 			temporaryDirectoryPath = newTemporaryDirectoryPath;
 			done();
@@ -70,9 +72,9 @@ describe("akiro.initialize(iamRoleName, callback)", () => {
 				execDone();
 			},
 
-			[`node ${mockNpmPath} info .*`]: execDone => {
-				execDone(null, "1.5.0");
-			}
+			// [`node ${mockNpmPath} info .*`]: execDone => {
+			// 	execDone(null, "1.5.0");
+			// }
 		});
 
 		mockTemp = {
