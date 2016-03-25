@@ -12,6 +12,7 @@ import fileSystem from "fs-extra";
 import Decompress from "decompress";
 import util from "util";
 import color from "colors";
+
 const invokeBuilderLambdas = Symbol();
 const createInvokeLambdaTask = Symbol();
 const downloadObjectsFromS3 = Symbol();
@@ -35,6 +36,7 @@ export default class Akiro {
 		this.AWS = _.config.AWS || AWS;
 		this.temp = _.config.temp || temp;
 		this.exec = _.config.exec || exec;
+
 		this.cacheDirectoryPath = _.config.cacheDirectoryPath || "./.akiro/cache";
 
 		this.debug(".constructor", config);
@@ -102,7 +104,7 @@ export default class Akiro {
 			};
 		};
 
-		this.temp.mkdir(`akiro.initialize`, (error, temporaryDirectoryPath) => {
+		this.temp.mkdir("akiro.initialize", (error, temporaryDirectoryPath) => {
 			this.Async.series([
 				(done) => {
 					let builderDependencyTasks = [];

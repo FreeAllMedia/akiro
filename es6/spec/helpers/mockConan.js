@@ -1,16 +1,21 @@
-import MockComponent from "./mockComponent.js";
+import ChainLink from "mrt";
+import sinon from "sinon";
 
-export default class MockConan extends MockComponent {
+export default class MockConan extends ChainLink {
 	initialize() {
-		this.property("use");
-		this.addComponent("lambda", MockConanLambda);
-		this.asyncMethod("deploy");
+		this.link("lambda", MockConanLambda);
+
+		this.use = sinon.spy();
+	}
+
+	deploy(callback) {
+		callback();
 	}
 }
 
-class MockConanLambda extends MockComponent {
+class MockConanLambda extends ChainLink {
 	initialize(name) {
-		this.chainedProperties(
+		this.parameters(
 			"name",
 			"filePath",
 			"handler",
@@ -24,11 +29,11 @@ class MockConanLambda extends MockComponent {
 			"packages"
 		);
 
-		this.chainedMultipleValueAggregateProperty(
+		this.parameters(
 			"dependencies"
-		);
+		).multiValue.aggregate;
 
-		this.addComponent("lambda", MockConanLambda);
+		this.link("lambda", MockConanLambda);
 
 		this.name(name);
 		this.runtime("nodejs");

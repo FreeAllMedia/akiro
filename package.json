@@ -13,11 +13,11 @@
   },
   "keywords": [
     "akiro",
-		"aws",
-		"lambda",
-		"npm",
-		"native",
-		"extensions"
+    "aws",
+    "lambda",
+    "npm",
+    "native",
+    "extensions"
   ],
   "author": "Free All Media, LLC",
   "contributors": [],
@@ -48,6 +48,7 @@
     "fs-extra": "^0.26.4",
     "glob": "^7.0.3",
     "incognito": "^0.1.4",
+    "mrt": "0.0.3",
     "temp": "^0.8.3",
     "unzip2": "^0.2.5"
   },

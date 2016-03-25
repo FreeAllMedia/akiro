@@ -40,7 +40,7 @@ describe("akiro.initialize(iamRoleName, callback)", () => {
 
 	beforeEach(function (done) {
 		this.timeout(10000);
-		
+
 		lambdaName = "AkiroBuilder";
 		lambdaRole = "AkiroLambda";
 
@@ -99,7 +99,7 @@ describe("akiro.initialize(iamRoleName, callback)", () => {
 		mockConan.use.calledWith(ConanAwsLambdaPlugin).should.be.true;
 	});
 
-	describe("Akiro Lambda", () => {
+	describe("Akiro Builder", () => {
 		beforeEach(() => {
 			mockConanLambda = mockConan.components.lambda[0];
 		});

@@ -1,4 +1,4 @@
-import AkiroBuilder from "../../../../lib/akiro/builders/nodejs/akiroBuilder.js";
+import AkiroBuilder from "../../../../lib/builders/nodejs/akiroBuilder.js";
 import sinon from "sinon";
 import temp from "temp";
 import asyncPackageJson from "../../../../../node_modules/async/package.json";

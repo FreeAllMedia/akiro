@@ -1,4 +1,4 @@
-import AkiroBuilder from "../../../../lib/akiro/builders/nodejs/akiroBuilder.js";
+import AkiroBuilder from "../../../../lib/builders/nodejs/akiroBuilder.js";
 import sinon from "sinon";
 import temp from "temp";
 import { exec } from "child_process";
@@ -116,7 +116,7 @@ describe("AkiroBuilder(event, context)", () => {
 		it("should be set to the base package path if not provided", () => {
 			context.npmPath = undefined;
 			akiroBuilder = new AkiroBuilder(event, context);
-			akiroBuilder.npmPath.should.eql(path.normalize(`${__dirname}/../../../../lib/akiro/builders/nodejs/node_modules/npm/bin/npm-cli.js`));
+			akiroBuilder.npmPath.should.eql(path.normalize(`${__dirname}/../../../../lib/builders/nodejs/node_modules/npm/bin/npm-cli.js`));
 		});
 	});
 

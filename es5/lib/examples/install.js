@@ -9,7 +9,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var akiro = new _akiro2.default(); /* eslint-disable no-console */
 
 console.log("Akiro deploying...");
-akiro.debug.region("us-east-1").bucket("fam-akiro").roleName("AWSLambda").initialize(function (error) {
+akiro.debug.region("us-east-1").bucket("fam-akiro").roleName("AWSLambda").install(function (error) {
 	if (error) {
 		throw error;
 	}
