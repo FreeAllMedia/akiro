@@ -3,7 +3,9 @@ import sinon from "sinon";
 
 export default class MockConan extends ChainLink {
 	initialize() {
-		this.link("lambda", MockConanLambda);
+		this
+			.link("lambda", MockConanLambda)
+				.into("lambdas");
 
 		this.use = sinon.spy();
 	}
@@ -32,8 +34,6 @@ class MockConanLambda extends ChainLink {
 		this.parameters(
 			"dependencies"
 		).multiValue.aggregate;
-
-		this.link("lambda", MockConanLambda);
 
 		this.name(name);
 		this.runtime("nodejs");

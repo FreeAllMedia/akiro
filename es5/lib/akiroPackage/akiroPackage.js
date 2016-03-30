@@ -18,24 +18,25 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var AkiroPackages = function (_ChainLink) {
-	_inherits(AkiroPackages, _ChainLink);
+var AkiroPackage = function (_ChainLink) {
+	_inherits(AkiroPackage, _ChainLink);
 
-	function AkiroPackages() {
-		_classCallCheck(this, AkiroPackages);
+	function AkiroPackage() {
+		_classCallCheck(this, AkiroPackage);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(AkiroPackages).apply(this, arguments));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(AkiroPackage).apply(this, arguments));
 	}
 
-	_createClass(AkiroPackages, [{
+	_createClass(AkiroPackage, [{
 		key: "initialize",
-		value: function initialize(packageList) {
-			this.parameters("packageList");
-			this.packageList(packageList);
+		value: function initialize(packageName, packageVersion) {
+			this.parameters("name", "version");
+			this.name(packageName);
+			this.version(packageVersion);
 		}
 	}]);
 
-	return AkiroPackages;
+	return AkiroPackage;
 }(_mrt2.default);
 
-exports.default = AkiroPackages;
+exports.default = AkiroPackage;

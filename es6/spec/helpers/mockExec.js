@@ -4,7 +4,6 @@ import { exec } from "child_process";
 
 export default function createMockExec(commandsAndCallbacks) {
 	return sinon.spy((command, commandDone) => {
-
 		let match = false;
 		let callback;
 		for (let commandString in commandsAndCallbacks) {

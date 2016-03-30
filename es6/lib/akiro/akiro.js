@@ -4,23 +4,35 @@ import ConanAwsLambda from "conan-aws-lambda";
 import path from "path";
 import temp from "temp";
 import privateData from "incognito";
+import NpmPackageBuilder from "../npmPackageBuilder/npmPackageBuilder.js";
 
-import AkiroPackages from "./akiroPackages.js";
+import AkiroPackages from "../akiroPackages/akiroPackages.js";
+import AkiroPackage from "../akiroPackage/akiroPackage.js";
+
+import packageJson from "../../../package.json";
 
 const setParameters = Symbol();
 const setLinks = Symbol();
 const setDefaults = Symbol();
 const setPrivateData = Symbol();
+const setNpmPackageBuilder = Symbol();
 const setConan = Symbol();
 const setLambda = Symbol();
 
 export default class Akiro extends ChainLink {
 	initialize(config = {}) {
 		this[setParameters]();
+		this[setLinks]();
 		this[setDefaults](config);
 		this[setPrivateData](config);
 		this[setConan]();
 		this[setLambda]();
+		this[setNpmPackageBuilder]();
+	}
+
+	install(callback) {
+		const install = require("../akiro/akiro.install.js").default;
+		return install.call(this, callback);
 	}
 
 	[setParameters]() {
@@ -28,8 +40,13 @@ export default class Akiro extends ChainLink {
 			"role",
 			"region",
 			"bucket",
-			"temporaryDirectoryPath"
+			"temporaryDirectoryPath",
+			"builderDependencies"
 		);
+	}
+
+	[setLinks]() {
+		this.link("packages", AkiroPackages);
 	}
 
 	[setDefaults](config) {
@@ -37,13 +54,23 @@ export default class Akiro extends ChainLink {
 		this.region(config.region);
 		this.bucket(config.bucket);
 
+		this.builderDependencies(config.builderDependencies || packageJson.builderDependencies);
+
+		config.libraries = config.libraries || {};
+
 		const temporaryDirectoryPath = config.temporaryDirectoryPath || temp.mkdirSync();
 		this.temporaryDirectoryPath(temporaryDirectoryPath);
 	}
 
 	[setPrivateData](config) {
 		const _ = privateData(this);
-		_.Conan = config.Conan || Conan;
+		_.Conan = config.libraries.conan || Conan;
+		_.NpmPackageBuilder = config.libraries.npmPackageBuilder || NpmPackageBuilder;
+	}
+
+	[setNpmPackageBuilder]() {
+		const _ = privateData(this);
+		this.npmPackageBuilder = new _.NpmPackageBuilder();
 	}
 
 	[setConan]() {
@@ -64,4 +91,4 @@ export default class Akiro extends ChainLink {
 	}
 }
 
-export { AkiroPackages };
+export { AkiroPackages, AkiroPackage };

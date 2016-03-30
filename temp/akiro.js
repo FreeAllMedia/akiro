@@ -99,6 +99,7 @@ export default class Akiro {
 						done();
 					}
 				};
+
 				const builder = new AkiroBuilder(event, context);
 				builder.invoke(event, context);
 			};

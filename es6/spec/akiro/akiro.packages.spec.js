@@ -2,11 +2,11 @@ import Akiro, { AkiroPackages } from "../../lib/akiro/akiro.js";
 
 describe("akiro.packages()", () => {
 	let akiro,
-			packages;
+			requestedPackages;
 
 	beforeEach(() => {
 		akiro = new Akiro();
-		packages = {
+		requestedPackages = {
 			"async": "1.0.0"
 		};
 	});
@@ -15,8 +15,8 @@ describe("akiro.packages()", () => {
 		akiro.packages().should.be.instanceOf(AkiroPackages);
 	});
 
-	it("should return an instance of AkiroPackages", () => {
-		const akiroPackages = akiro.packages(packages);
-		akiroPackages.packages().should.eql(packages);
+	it("should pass the designated packages to the AkiroPackages instance", () => {
+		const akiroPackages = akiro.packages(requestedPackages);
+		akiroPackages.requestedPackages().should.eql(requestedPackages);
 	});
 });

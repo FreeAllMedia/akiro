@@ -15,12 +15,12 @@ gulp.task("test-es6", ["build"], () => {
 			gulp.src(paths.build.sourceSpec)
 				.pipe(mocha())
 				.pipe(istanbul.writeReports({dir: `${__dirname}/../`, reporters: ["text-summary", "lcovonly"]})) // Creating the reports after tests ran
-				// .pipe(istanbul.enforceThresholds({ thresholds: { global: 100 } })) // Enforce a coverage of 100%
-				.once("error", function () {
-					process.exit(1);
-				})
-				.once("end", function () {
-					process.exit();
-				});
+				//.pipe(istanbul.enforceThresholds({ thresholds: { global: 100 } })) // Enforce a coverage of 100%
+				// .once("error", function () {
+				// 	process.exit(1);
+				// })
+				// .once("end", function () {
+				// 	process.exit();
+				// });
 		});
 });

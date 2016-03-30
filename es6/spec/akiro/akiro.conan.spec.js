@@ -8,7 +8,9 @@ describe("akiro.conan", () => {
 
 	beforeEach(() => {
 		akiro = new Akiro({
-			Conan: MockConan
+			libraries: {
+				conan: MockConan
+			}
 		});
 	});
 

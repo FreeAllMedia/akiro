@@ -1,5 +1,6 @@
 import Akiro from "../../lib/akiro/akiro.js";
 import MockConan from "../helpers/mockConan.js";
+import MockNpmPackageBuilder from "../helpers/mockNpmPackageBuilder.js";
 
 describe("akiro.config", () => {
 	let akiro,
@@ -11,7 +12,13 @@ describe("akiro.config", () => {
 			region: "us-east-1",
 			role: "MyIAmRole",
 			temporaryDirectoryPath: "/temp/path",
-			Conan: MockConan
+			builderDependencies: {
+				"async": "1.0.0"
+			},
+			libraries: {
+				conan: MockConan,
+				npmPackageBuilder: MockNpmPackageBuilder
+			}
 		};
 
 		akiro = new Akiro(config);
@@ -29,8 +36,16 @@ describe("akiro.config", () => {
 		akiro.role().should.eql(config.role);
 	});
 
-	it("should instantiate conan from config.Conan", () => {
+	it("should save builderDependencies to .builderDependencies()", () => {
+		akiro.builderDependencies().should.eql(config.builderDependencies);
+	});
+
+	it("should instantiate conan from config.libraries.conan", () => {
 		akiro.conan.should.be.instanceOf(MockConan);
+	});
+
+	it("should instantiate npmPackageBuilder from config.libraries.npmPackageBuilder", () => {
+		akiro.npmPackageBuilder.should.be.instanceOf(MockNpmPackageBuilder);
 	});
 
 	it("should save temporaryDirectoryPath to .temporaryDirectoryPath()", () => {

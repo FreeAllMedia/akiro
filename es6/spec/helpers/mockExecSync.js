@@ -3,7 +3,7 @@ import { execSync } from "child_process";
 // import fileSystem from "fs-extra";
 
 export default function createMockExecSync(commandsAndValues) {
-	return sinon.spy((command) => {
+	return sinon.spy(command => {
 		let match = false;
 		let value;
 		for (let commandString in commandsAndValues) {
@@ -14,16 +14,20 @@ export default function createMockExecSync(commandsAndValues) {
 			}
 		}
 
+		let returnValue;
+
 		if (match) {
-			return value;
+			returnValue = value;
 		} else {
 			value = commandsAndValues[command];
 			if (value) {
-				return value;
+				returnValue = value;
 			} else {
 				unmockedCommand(command);
 			}
 		}
+
+		return returnValue;
 	});
 }
 
