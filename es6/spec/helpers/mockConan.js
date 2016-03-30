@@ -8,10 +8,7 @@ export default class MockConan extends ChainLink {
 				.into("lambdas");
 
 		this.use = sinon.spy();
-	}
-
-	deploy(callback) {
-		callback();
+		this.deploy = sinon.spy(done => done());
 	}
 }
 

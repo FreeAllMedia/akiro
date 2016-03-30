@@ -88,8 +88,7 @@ var Akiro = function (_ChainLink) {
 	}, {
 		key: "install",
 		value: function install(callback) {
-			var install = require("../akiro/akiro.install.js").default;
-			return install.call(this, callback);
+			return require("../akiro/akiro.install.js").default.call(this, callback);
 		}
 	}, {
 		key: setParameters,
@@ -139,10 +138,13 @@ var Akiro = function (_ChainLink) {
 	}, {
 		key: setLambda,
 		value: function value() {
-			var handlerFilePath = _path2.default.normalize(__dirname + "/../builders/nodejs/handler.js");
+			var handlerFilePath = _path2.default.normalize(__dirname + "/../akiroBuilder/npm/handler.js");
 
 			this.lambda = this.conan.lambda("AkiroBuilder");
-			this.lambda.timeout(300).filePath(handlerFilePath).role(this.role());
+
+			this.lambda.dependencies("**/*", {
+				basePath: this.temporaryDirectoryPath()
+			}).timeout(300).filePath(handlerFilePath).role(this.role());
 		}
 	}]);
 

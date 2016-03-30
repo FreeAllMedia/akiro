@@ -5,16 +5,14 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = buildDependencies;
 
-var _npmPackageBuilder = require("../npmPackageBuilder/npmPackageBuilder.js");
+var _incognito = require("incognito");
 
-var _npmPackageBuilder2 = _interopRequireDefault(_npmPackageBuilder);
+var _incognito2 = _interopRequireDefault(_incognito);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function buildDependencies(done) {
-	var npmPackageBuilder = new _npmPackageBuilder2.default(this.builderDependencies(), this.temporaryDirectoryPath());
-	npmPackageBuilder.build(function () {
-		console.log("DONE?!?!?!!??!");
-		done();
-	});
+	var NpmPackageBuilder = (0, _incognito2.default)(this).NpmPackageBuilder;
+	var npmPackageBuilder = new NpmPackageBuilder(this.builderDependencies(), this.temporaryDirectoryPath() + "/node_modules");
+	npmPackageBuilder.build(done);
 }

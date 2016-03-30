@@ -27,7 +27,7 @@ describe("akiro.lambda", () => {
 	});
 
 	it("should use the supplied handlerFilePath", () => {
-		const filePath = path.normalize(`${__dirname}/../../lib/builders/nodejs/handler.js`);
+		const filePath = path.normalize(`${__dirname}/../../lib/akiroBuilder/npm/handler.js`);
 		lambda.filePath().should.eql(filePath);
 	});
 

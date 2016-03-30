@@ -1,56 +1,71 @@
 import Akiro from "../../lib/akiro/akiro.js";
 import glob from "glob";
 import temp from "temp";
-import packageJSON from "../../../package.json";
 import path from "path";
+import packageJSON from "../../../package.json";
 import MockConan from "../helpers/mockConan.js";
+import MockNpmPackageBuilder from "../helpers/mockNpmPackageBuilder.js";
 
 describe("akiro.install()", () => {
 	let akiro,
-			temporaryDirectoryPath;
+			temporaryDirectoryPath,
+			dependencyFilePaths,
+			callback;
 
 	beforeEach(done => {
+		callback = done;
 		temporaryDirectoryPath = temp.mkdirSync("akiro.install");
 
 		akiro = new Akiro({
 			temporaryDirectoryPath: temporaryDirectoryPath,
 			libraries: {
-				conan: MockConan
+				conan: MockConan,
+				npmPackageBuilder: MockNpmPackageBuilder
 			}
 		});
 
-		akiro.install(done);
+		akiro.install(() => {
+			dependencyFilePaths = glob.sync(`${temporaryDirectoryPath}/node_modules/*`);
+			callback();
+		});
 	});
 
-	it("should build its own dependencies in a temp directory", () => {
-		const dependencyFileNames = glob.sync(`${temporaryDirectoryPath}/*`).map((dependencyPath) => {
+	it("should copy akiroBuilder and build its own dependencies into a temp directory", () => {
+		const builderFilePaths = glob.sync(`${temporaryDirectoryPath}/*`, { nodir: true });
+
+		const filePaths = Array.concat(builderFilePaths, dependencyFilePaths).map((dependencyPath) => {
 			return dependencyPath.replace(`${temporaryDirectoryPath}/`, "");
 		});
 
-		const builderDependencies = packageJSON.builderDependencies;
-
-		const expectedModuleFileNames = [];
-
-		for (let dependencyName in builderDependencies) {
-			expectedModuleFileNames.push(`node_modules/${dependencyName}`);
+		const expectedBuilderFilePaths = [
+			"akiroBuilder.js",
+			"handler.js"
+		];
+		const expectedDependencyFilePaths = [];
+		for (let dependencyName in packageJSON.builderDependencies) {
+			expectedDependencyFilePaths.push(`node_modules/${dependencyName}`);
 		}
+		const expectedFilePaths = Array.concat(expectedBuilderFilePaths, expectedDependencyFilePaths);
 
-		dependencyFileNames.should.contain.members(expectedModuleFileNames);
+		filePaths.should.contain.members(expectedFilePaths);
 	});
 
 	it("should include akiroBuilder and dependencies in the lambda", () => {
-		let dependencyPaths = [
-			[path.normalize(`${__dirname}/../../lib/akiro/builders/nodejs/akiroBuilder.js`)],
-			[`${temporaryDirectoryPath}/node_modules/**/*`, {
-				zipPath: "/node_modules/",
-				basePath: `${temporaryDirectoryPath}/node_modules/`
-			}]
-		];
-
-		akiro.lambda.dependencies().should.eql(dependencyPaths);
+		dependencyFilePaths.push("akiroBuilder.js");
+		akiro.lambda.dependencies().should.eql([[
+			"**/*",
+			{
+				"basePath": temporaryDirectoryPath
+			}
+		]]);
 	});
 
-	xit("should be deployed to AWS", () => {
-		mockConan.deploy.calledWith(callback).should.be.true;
+	it("should set the lambda filePath to the handler", () => {
+		const handlerFilePath = path.normalize(`${__dirname}/../../lib/akiroBuilder/npm/handler.js`);
+		akiro.lambda.filePath().should.eql(handlerFilePath);
+	});
+
+	it("should be deployed to AWS", () => {
+		akiro.conan.deploy.called.should.be.true;
 	});
 });

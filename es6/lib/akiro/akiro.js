@@ -31,8 +31,7 @@ export default class Akiro extends ChainLink {
 	}
 
 	install(callback) {
-		const install = require("../akiro/akiro.install.js").default;
-		return install.call(this, callback);
+		return require("../akiro/akiro.install.js").default.call(this, callback);
 	}
 
 	[setParameters]() {
@@ -81,10 +80,14 @@ export default class Akiro extends ChainLink {
 	}
 
 	[setLambda]() {
-		const handlerFilePath = path.normalize(`${__dirname}/../builders/nodejs/handler.js`);
+		const handlerFilePath = path.normalize(`${__dirname}/../akiroBuilder/npm/handler.js`);
 
 		this.lambda = this.conan.lambda("AkiroBuilder");
+
 		this.lambda
+			.dependencies("**/*", {
+				basePath: this.temporaryDirectoryPath()
+			})
 			.timeout(300)
 			.filePath(handlerFilePath)
 			.role(this.role());
