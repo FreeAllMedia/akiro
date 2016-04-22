@@ -1,7 +1,7 @@
 {
   "generatorVersion": "0.2.21",
   "name": "akiro",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "Magically compile NPM packages with native extensions for AWS Lambda.",
   "main": "index.js",
   "scripts": {
@@ -13,11 +13,11 @@
   },
   "keywords": [
     "akiro",
-		"aws",
-		"lambda",
-		"npm",
-		"native",
-		"extensions"
+    "aws",
+    "lambda",
+    "npm",
+    "native",
+    "extensions"
   ],
   "author": "Free All Media, LLC",
   "contributors": [],
@@ -42,7 +42,7 @@
     "aws-sdk": "^2.2.28",
     "colors": "^1.1.2",
     "conan": "^0.0.24",
-    "conan-aws-lambda": "^0.0.11",
+    "conan-aws-lambda": "0.0.12",
     "decompress": "^3.0.0",
     "flowsync": "^0.1.12",
     "fs-extra": "^0.26.4",
